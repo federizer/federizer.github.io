@@ -129,7 +129,7 @@
      id="namedview4487"
      showgrid="false"
      inkscape:zoom="2"
-     inkscape:cx="356.01286"
+     inkscape:cx="391.4501"
      inkscape:cy="383.84821"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
@@ -483,15 +483,15 @@
 </g></g><text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:7.00426435px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.40409216"
-       x="170.20953"
+       x="167.20953"
        y="-321.13385"
        id="text4951-8-4"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4949-1-0"
-         x="170.20953"
+         x="167.20953"
          y="-321.13385"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.40409216">identities</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.40409216">credentials</tspan></text>
 <g
        id="g5653"
        style="opacity:1;stroke:none;stroke-opacity:1"
@@ -954,15 +954,15 @@
 </g></g><text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:7.00426435px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.40409213"
-       x="523.45959"
+       x="520.45959"
        y="-321.17804"
        id="text4951-8-4-6"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4949-1-0-0"
-         x="523.45959"
+         x="520.45959"
          y="-321.17804"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.40409213">identities</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.40409213">credentials</tspan></text>
 <g
        id="g5653-8"
        style="opacity:1;stroke:none;stroke-opacity:1"
@@ -1081,8 +1081,8 @@
            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.75"
            id="tspan6720-1">Server</tspan></text>
 </g><path
-       style="fill:none;stroke:#000000;stroke-width:0.79459047;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
-       d="m 292.68485,291.97524 c 136.911,0 137.50626,0 137.50626,0"
+       style="fill:none;stroke:#000000;stroke-width:0.78709173;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Mstart);marker-end:url(#Arrow1Mend)"
+       d="m 294.15556,291.97524 c 134.33906,0 134.92314,0 134.92314,0"
        id="path4792"
        inkscape:connector-curvature="0" /><text
        xml:space="preserve"

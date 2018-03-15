@@ -86,7 +86,7 @@
      id="namedview4487"
      showgrid="false"
      inkscape:zoom="1"
-     inkscape:cx="307.14561"
+     inkscape:cx="132.14561"
      inkscape:cy="308.70102"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
@@ -405,12 +405,12 @@
          d="m 283.70001,329.45218 c 0,-21.649 -17.551,-39.2 -39.2,-39.2 -21.65,0 -39.2,17.551 -39.2,39.2 0,21.65 17.55,39.2 39.2,39.2 21.649,0 39.2,-17.55 39.2,-39.2 z" /><text
          transform="scale(1,-1)"
          id="text4891-1"
-         y="-324.2106"
+         y="-325.7106"
          x="226.95067"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.00000095px;line-height:1.25;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
          xml:space="preserve"><tspan
            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75"
-           y="-324.2106"
+           y="-325.7106"
            x="226.95067"
            id="tspan4889-0"
            sodipodi:role="line">Agent</tspan></text>
@@ -438,15 +438,15 @@
 </g></g><text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-       x="335.08472"
+       x="329.08472"
        y="-401.41852"
        id="text4951-8-4"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4949-1-0"
-         x="335.08472"
+         x="329.08472"
          y="-401.41852"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">identities</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">credentials</tspan></text>
 <g
        id="g5653"
        style="opacity:1;stroke:none;stroke-opacity:1"><path
