@@ -1,106 +1,195 @@
-CREATE OR REPLACE FUNCTION trigger_set_timestamp()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.mtime = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- ----------------------------
+-- Table structure for attachment
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."attachment";
+CREATE TABLE "public"."attachment" (
+"id" uuid NOT NULL,
+"file_name" varchar(255) COLLATE "default" NOT NULL,
+"mime_type" varchar(255) COLLATE "default" NOT NULL,
+"uuaid" uuid NOT NULL,
+"uufid" uuid NOT NULL,
+"message_id" uuid NOT NULL
+)
+WITH (OIDS=FALSE)
 
-CREATE TABLE IF NOT EXISTS identity (
-  guidentity varchar(255) NOT NULL,
-  PRIMARY KEY (guidentity)
-);
+;
 
-CREATE TABLE IF NOT EXISTS entity (
-  owner varchar(255) NOT NULL,
-  guid bytea NOT NULL,
-  creator varchar(255) NOT NULL,
-  entity_parent_guid bytea,
-  ctime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  mtime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  perms int DEFAULT '500',
-  type int DEFAULT '0',
-  subtype int DEFAULT '0',
-  locked smallint DEFAULT 0,
-  hidden smallint DEFAULT 0,
-  refnum_guid bytea,
-  refnum varchar(255),
-  PRIMARY KEY (owner, guid),
-  CONSTRAINT fk_entity_owner FOREIGN KEY (owner) REFERENCES identity(guidentity),
-  CONSTRAINT fk_entity_creator FOREIGN KEY (creator) REFERENCES identity(guidentity),
-  CONSTRAINT fk_entity_entity_parent_owner_guid FOREIGN KEY (owner, entity_parent_guid) REFERENCES entity(owner, guid)
-);
+-- ----------------------------
+-- Table structure for envelope
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."envelope";
+CREATE TABLE "public"."envelope" (
+"id" uuid NOT NULL,
+"meta" jsonb,
+"uueid" uuid NOT NULL,
+"message_id" uuid NOT NULL,
+"recipient_id" uuid NOT NULL
+)
+WITH (OIDS=FALSE)
 
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON entity
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
+;
 
-CREATE TABLE IF NOT EXISTS entity_content (
-  owner varchar(255) NOT NULL,
-  guid bytea NOT NULL,
-  creator varchar(255) NOT NULL,
-  entity_guid bytea NOT NULL,
-  ctime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  mtime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  mime_type varchar(50) NOT NULL DEFAULT 'application/octet-stream',
-  size bigint NOT NULL DEFAULT 0,
-  meta varchar(1000) default '{}',
-  sha1 bytea DEFAULT NULL,
-  PRIMARY KEY (owner, guid),
-  CONSTRAINT fk_entity_content_owner FOREIGN KEY (owner) REFERENCES identity(guidentity),
-  CONSTRAINT fk_entity_content_creator FOREIGN KEY (creator) REFERENCES identity(guidentity),
-  CONSTRAINT fk_entity_content_entity_owner_guid FOREIGN KEY (owner, entity_guid) REFERENCES entity(owner, guid)
-);
+-- ----------------------------
+-- Table structure for envelope_label
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."envelope_label";
+CREATE TABLE "public"."envelope_label" (
+"id" uuid NOT NULL,
+"name" varchar(255) COLLATE "default" NOT NULL,
+"envelope_id" uuid NOT NULL
+)
+WITH (OIDS=FALSE)
 
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON entity_content
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
+;
 
-CREATE TABLE IF NOT EXISTS link (
-  owner varchar(255) NOT NULL,
-  guid bytea NOT NULL,
-  creator varchar(255) NOT NULL,
-  entity_guid bytea NOT NULL,
-  entity_parent_guid bytea,
-  ctime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  mtime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  name varchar(1000),
-  unread smallint DEFAULT 0,
-  starred smallint DEFAULT 0,
-  PRIMARY KEY (owner, guid),
-  CONSTRAINT fk_link_owner FOREIGN KEY (owner) REFERENCES identity(guidentity),
-  CONSTRAINT fk_link_creator FOREIGN KEY (creator) REFERENCES identity(guidentity),
-  CONSTRAINT fk_link_entity_owner_guid FOREIGN KEY (owner, entity_guid) REFERENCES entity(owner, guid),
-  CONSTRAINT fk_link_entity_parent_owner_guid FOREIGN KEY (owner, entity_parent_guid) REFERENCES entity(owner, guid)
-);
+-- ----------------------------
+-- Table structure for envelope_properties
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."envelope_properties";
+CREATE TABLE "public"."envelope_properties" (
+"id" uuid NOT NULL,
+"meta" jsonb,
+"rejected" bool DEFAULT false NOT NULL,
+"starred" bool DEFAULT false NOT NULL,
+"unread" bool DEFAULT true NOT NULL,
+"envelope_id" uuid NOT NULL
+)
+WITH (OIDS=FALSE)
 
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON link
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
+;
 
-CREATE TABLE IF NOT EXISTS access (
-  owner varchar(255) NOT NULL,
-  guid bytea NOT NULL,
-  guidentity varchar(255) NOT NULL,
-  link_guid bytea NOT NULL,
-  entity_content_guid bytea NOT NULL,
-  ctime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  mtime TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  perms int DEFAULT '500',
-  keygen_meta varchar(255),  
-  PRIMARY KEY (owner, guid),
-  CONSTRAINT fk_access_owner FOREIGN KEY (owner) REFERENCES identity(guidentity),
-  CONSTRAINT fk_access_guidentity FOREIGN KEY (guidentity) REFERENCES identity(guidentity),
-  CONSTRAINT fk_access_link_owner_guid FOREIGN KEY (owner, link_guid) REFERENCES link(owner, guid),
-  CONSTRAINT fk_access_entity_content_owner_guid FOREIGN KEY (owner, entity_content_guid) REFERENCES entity_content(owner, guid)
-);
+-- ----------------------------
+-- Table structure for identity
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."identity";
+CREATE TABLE "public"."identity" (
+"id" uuid NOT NULL,
+"upn" varchar(255) COLLATE "default" NOT NULL
+)
+WITH (OIDS=FALSE)
 
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON access
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
+;
 
+-- ----------------------------
+-- Table structure for message
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."message";
+CREATE TABLE "public"."message" (
+"id" uuid NOT NULL,
+"mime_type" varchar(255) COLLATE "default" NOT NULL,
+"received" timestamp(6),
+"sent" timestamp(6),
+"subject" varchar(255) COLLATE "default" NOT NULL,
+"time_stamp" timestamp(6) NOT NULL,
+"uufid" uuid NOT NULL,
+"uumid" uuid NOT NULL,
+"uurn" uuid NOT NULL,
+"sender_id" uuid NOT NULL
+)
+WITH (OIDS=FALSE)
 
+;
+
+-- ----------------------------
+-- Table structure for message_properties
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."message_properties";
+CREATE TABLE "public"."message_properties" (
+"id" uuid NOT NULL,
+"created" timestamp(6) NOT NULL,
+"modified" timestamp(6),
+"message_id" uuid NOT NULL
+)
+WITH (OIDS=FALSE)
+
+;
+
+-- ----------------------------
+-- Alter Sequences Owned By 
+-- ----------------------------
+
+-- ----------------------------
+-- Uniques structure for table attachment
+-- ----------------------------
+ALTER TABLE "public"."attachment" ADD UNIQUE ("uufid");
+
+-- ----------------------------
+-- Primary Key structure for table attachment
+-- ----------------------------
+ALTER TABLE "public"."attachment" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Primary Key structure for table envelope
+-- ----------------------------
+ALTER TABLE "public"."envelope" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Primary Key structure for table envelope_label
+-- ----------------------------
+ALTER TABLE "public"."envelope_label" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Uniques structure for table envelope_properties
+-- ----------------------------
+ALTER TABLE "public"."envelope_properties" ADD UNIQUE ("envelope_id");
+
+-- ----------------------------
+-- Primary Key structure for table envelope_properties
+-- ----------------------------
+ALTER TABLE "public"."envelope_properties" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Primary Key structure for table identity
+-- ----------------------------
+ALTER TABLE "public"."identity" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Uniques structure for table message
+-- ----------------------------
+ALTER TABLE "public"."message" ADD UNIQUE ("uufid");
+
+-- ----------------------------
+-- Primary Key structure for table message
+-- ----------------------------
+ALTER TABLE "public"."message" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Uniques structure for table message_properties
+-- ----------------------------
+ALTER TABLE "public"."message_properties" ADD UNIQUE ("message_id");
+
+-- ----------------------------
+-- Primary Key structure for table message_properties
+-- ----------------------------
+ALTER TABLE "public"."message_properties" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."attachment"
+-- ----------------------------
+ALTER TABLE "public"."attachment" ADD FOREIGN KEY ("message_id") REFERENCES "public"."message" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."envelope"
+-- ----------------------------
+ALTER TABLE "public"."envelope" ADD FOREIGN KEY ("message_id") REFERENCES "public"."message" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "public"."envelope" ADD FOREIGN KEY ("recipient_id") REFERENCES "public"."identity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."envelope_label"
+-- ----------------------------
+ALTER TABLE "public"."envelope_label" ADD FOREIGN KEY ("envelope_id") REFERENCES "public"."envelope" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."envelope_properties"
+-- ----------------------------
+ALTER TABLE "public"."envelope_properties" ADD FOREIGN KEY ("envelope_id") REFERENCES "public"."envelope" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."message"
+-- ----------------------------
+ALTER TABLE "public"."message" ADD FOREIGN KEY ("sender_id") REFERENCES "public"."identity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."message_properties"
+-- ----------------------------
+ALTER TABLE "public"."message_properties" ADD FOREIGN KEY ("message_id") REFERENCES "public"."message" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
