@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS "public"."attachment";
 CREATE TABLE "public"."attachment" (
 "id" uuid NOT NULL,
 "file_name" varchar(255) COLLATE "default" NOT NULL,
+"meta" jsonb,
 "mime_type" varchar(255) COLLATE "default" NOT NULL,
 "uuaid" uuid NOT NULL,
 "uufid" uuid NOT NULL,
@@ -76,6 +77,7 @@ WITH (OIDS=FALSE)
 DROP TABLE IF EXISTS "public"."message";
 CREATE TABLE "public"."message" (
 "id" uuid NOT NULL,
+"meta" jsonb,
 "mime_type" varchar(255) COLLATE "default" NOT NULL,
 "received" timestamp(6),
 "sent" timestamp(6),
@@ -83,6 +85,7 @@ CREATE TABLE "public"."message" (
 "time_stamp" timestamp(6) NOT NULL,
 "uufid" uuid NOT NULL,
 "uumid" uuid NOT NULL,
+"uupid" uuid,
 "uurn" uuid NOT NULL,
 "sender_id" uuid NOT NULL
 )
