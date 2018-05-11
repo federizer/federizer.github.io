@@ -1,2 +1,2 @@
-## Federative Webmail System
-### The Federative Webmail System is a replacement for a traditional e-mail system that no longer meets security standards and functional requirements.
+## Federizer
+### Federizer is the cloud-native email system. It is a replacement for a traditional email system that no longer meets security standards and functional requirements.
