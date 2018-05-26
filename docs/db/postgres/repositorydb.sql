@@ -21,10 +21,10 @@ WITH (OIDS=FALSE)
 DROP TABLE IF EXISTS "public"."envelope";
 CREATE TABLE "public"."envelope" (
 "id" uuid NOT NULL,
-"meta" jsonb,
 "uueid" uuid NOT NULL,
 "message_id" uuid NOT NULL,
-"recipient_id" uuid NOT NULL
+"recipient_id" uuid NOT NULL,
+"meta" jsonb
 )
 WITH (OIDS=FALSE)
 
@@ -64,8 +64,7 @@ WITH (OIDS=FALSE)
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."identity";
 CREATE TABLE "public"."identity" (
-"id" uuid NOT NULL,
-"upn" varchar(255) COLLATE "default" NOT NULL
+"id" uuid NOT NULL
 )
 WITH (OIDS=FALSE)
 
@@ -108,6 +107,19 @@ WITH (OIDS=FALSE)
 ;
 
 -- ----------------------------
+-- Table structure for principal
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."principal";
+CREATE TABLE "public"."principal" (
+"id" uuid NOT NULL,
+"uupn" varchar(255) COLLATE "default" NOT NULL,
+"identity_id" uuid
+)
+WITH (OIDS=FALSE)
+
+;
+
+-- ----------------------------
 -- Alter Sequences Owned By 
 -- ----------------------------
 
@@ -142,11 +154,6 @@ ALTER TABLE "public"."envelope_properties" ADD UNIQUE ("envelope_id");
 ALTER TABLE "public"."envelope_properties" ADD PRIMARY KEY ("id");
 
 -- ----------------------------
--- Uniques structure for table identity
--- ----------------------------
-ALTER TABLE "public"."identity" ADD UNIQUE ("upn");
-
--- ----------------------------
 -- Primary Key structure for table identity
 -- ----------------------------
 ALTER TABLE "public"."identity" ADD PRIMARY KEY ("id");
@@ -172,6 +179,16 @@ ALTER TABLE "public"."message_properties" ADD UNIQUE ("message_id");
 ALTER TABLE "public"."message_properties" ADD PRIMARY KEY ("id");
 
 -- ----------------------------
+-- Uniques structure for table principal
+-- ----------------------------
+ALTER TABLE "public"."principal" ADD UNIQUE ("uupn");
+
+-- ----------------------------
+-- Primary Key structure for table principal
+-- ----------------------------
+ALTER TABLE "public"."principal" ADD PRIMARY KEY ("id");
+
+-- ----------------------------
 -- Foreign Key structure for table "public"."attachment"
 -- ----------------------------
 ALTER TABLE "public"."attachment" ADD FOREIGN KEY ("message_id") REFERENCES "public"."message" ("id") ON DELETE CASCADE ON UPDATE NO ACTION;
@@ -179,8 +196,8 @@ ALTER TABLE "public"."attachment" ADD FOREIGN KEY ("message_id") REFERENCES "pub
 -- ----------------------------
 -- Foreign Key structure for table "public"."envelope"
 -- ----------------------------
-ALTER TABLE "public"."envelope" ADD FOREIGN KEY ("recipient_id") REFERENCES "public"."identity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE "public"."envelope" ADD FOREIGN KEY ("message_id") REFERENCES "public"."message" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "public"."envelope" ADD FOREIGN KEY ("recipient_id") REFERENCES "public"."principal" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- ----------------------------
 -- Foreign Key structure for table "public"."envelope_label"
@@ -195,9 +212,14 @@ ALTER TABLE "public"."envelope_properties" ADD FOREIGN KEY ("envelope_id") REFER
 -- ----------------------------
 -- Foreign Key structure for table "public"."message"
 -- ----------------------------
-ALTER TABLE "public"."message" ADD FOREIGN KEY ("sender_id") REFERENCES "public"."identity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "public"."message" ADD FOREIGN KEY ("sender_id") REFERENCES "public"."principal" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- ----------------------------
 -- Foreign Key structure for table "public"."message_properties"
 -- ----------------------------
 ALTER TABLE "public"."message_properties" ADD FOREIGN KEY ("message_id") REFERENCES "public"."message" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- ----------------------------
+-- Foreign Key structure for table "public"."principal"
+-- ----------------------------
+ALTER TABLE "public"."principal" ADD FOREIGN KEY ("identity_id") REFERENCES "public"."identity" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
