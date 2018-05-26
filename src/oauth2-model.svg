@@ -85,9 +85,9 @@
      inkscape:window-height="1027"
      id="namedview4487"
      showgrid="false"
-     inkscape:zoom="1"
-     inkscape:cx="215.20425"
-     inkscape:cy="468.70102"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="391.66865"
+     inkscape:cy="348.70102"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -455,7 +455,7 @@
          style="display:inline;fill:#cdcccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1"
          d="m 410.56649,347.01786 c 0,-14.63 -22.253,-26.49 -49.704,-26.49 -27.451,0 -49.704,11.86 -49.704,26.49 0,14.63 22.253,26.49 49.704,26.49 27.451,0 49.704,-11.86 49.704,-26.49" /><text
          y="-342.59961"
-         x="337.4072"
+         x="332.9072"
          id="text4735"
          style="font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Myriad Pro';-inkscape-font-specification:MyriadPro-Bold;writing-mode:lr-tb;display:inline;fill:#231f20;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1"
          transform="scale(1,-1)"><tspan
@@ -463,7 +463,7 @@
            id="tspan4733"
            sodipodi:role="line"
            y="-342.59961"
-           x="337.4072">Services</tspan></text>
+           x="332.9072">Processes</tspan></text>
 </g><path
        inkscape:connector-curvature="0"
        d="m 361.02798,298.73602 c -4.79863,0 -8.68531,-1.94334 -8.68531,-4.34266 0,-2.39932 3.88668,-4.34265 8.68531,-4.34265 4.79864,0 8.68532,1.94333 8.68532,4.34265 0,2.39932 -3.88668,4.34266 -8.68532,4.34266 m -8.68531,-6.51399 v -3.25699 c 0,-2.39932 3.88668,-4.34266 8.68531,-4.34266 4.79864,0 8.68532,1.94334 8.68532,4.34266 v 3.25699 c 0,-2.39931 -3.88668,-4.34265 -8.68532,-4.34265 -4.79863,0 -8.68531,1.94334 -8.68531,4.34265 m 0,-5.42832 v -3.25699 c 0,-2.39932 3.88668,-4.34266 8.68531,-4.34266 4.79864,0 8.68532,1.94334 8.68532,4.34266 v 3.25699 c 0,-2.39932 -3.88668,-4.34266 -8.68532,-4.34266 -4.79863,0 -8.68531,1.94334 -8.68531,4.34266 z"
