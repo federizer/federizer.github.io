@@ -41,8 +41,8 @@ BEGIN
   SELECT input.id, mime_type, received_at, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, principal.id
   FROM input 
   LEFT JOIN principal ON input.sender = principal.uupn
-  RETURNING * INTO tmp;
-  -- NEW.sender_id = tmp.id;
+  RETURNING id INTO tmp;
+  NEW.id = tmp.id;
   RETURN NEW;
 END;
 
