@@ -77,10 +77,10 @@ DROP TABLE IF EXISTS "public"."message";
 CREATE TABLE "public"."message" (
 "id" uuid NOT NULL,
 "mime_type" varchar(255) COLLATE "default" NOT NULL,
-"received" timestamp(6),
-"sent" timestamp(6),
+"received_at" timestamp(6),
+"sent_at" timestamp(6),
 "subject" varchar(255) COLLATE "default",
-"time_stamp" timestamp(6) NOT NULL,
+"created_at" timestamp(6) NOT NULL,
 "uufid" uuid NOT NULL,
 "uumid" uuid NOT NULL,
 "uupid" uuid,
@@ -118,6 +118,25 @@ CREATE TABLE "public"."principal" (
 WITH (OIDS=FALSE)
 
 ;
+
+-- ----------------------------
+-- View structure for message_view
+-- ----------------------------
+CREATE OR REPLACE VIEW "public"."message_view" AS 
+ SELECT message.id,
+    message.mime_type,
+    message.received_at,
+    message.sent_at,
+    message.subject,
+    message.created_at,
+    message.uufid,
+    message.uumid,
+    message.uupid,
+    message.uurn,
+    message.meta,
+    principal.uupn AS sender
+   FROM (message
+     JOIN principal ON ((message.sender_id = principal.id)));
 
 -- ----------------------------
 -- Alter Sequences Owned By 
