@@ -53,9 +53,17 @@ CREATE OR REPLACE FUNCTION public.delete_message_view_func()
     RETURNS trigger
     LANGUAGE 'plpgsql'
 AS $BODY$
+DECLARE
+principal_id uuid;
 BEGIN
+  principal_id := (SELECT id FROM "public".principal WHERE uupn = OLD.sender);
+  IF principal_id IS NULL
+  THEN
+    RAISE EXCEPTION 'Principal % is not registered.', OLD.sender;
+  END IF;
+
   DELETE FROM message WHERE id = OLD.id;
-  RETURN NEW;
+  RETURN OLD;
 END;
 $BODY$;
 
