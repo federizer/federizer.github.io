@@ -1,4 +1,4 @@
--- DROP VIEW public.message_view;
+DROP VIEW public.message_view;
 
 CREATE OR REPLACE VIEW public.message_view AS
  SELECT message.id,
@@ -19,6 +19,25 @@ CREATE OR REPLACE VIEW public.message_view AS
 ALTER TABLE public.message_view
     OWNER TO admin;
 
+CREATE OR REPLACE FUNCTION public.insert_message_view_func()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+AS $BODY$
+DECLARE
+principal_id uuid;
+BEGIN
+  principal_id := (SELECT id FROM "public".principal WHERE uupn = NEW.sender);
+  IF principal_id IS NULL
+  THEN
+    RAISE EXCEPTION 'Principal % is not registered.', NEW.sender;
+  END IF;
+  
+  INSERT INTO message(id, mime_type, received_at, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, sender_id)
+  VALUES (NEW.id, NEW.mime_type, NEW.received_at, NEW.sent_at, NEW.subject, NEW.created_at, NEW.uufid, NEW.uumid, NEW.uupid, NEW.uurn, NEW.meta, principal_id);
+  RETURN NEW;
+END;
+$BODY$;
+
 -- DROP TRIGGER insert_message_view_trig ON public.message_view;
 
 CREATE TRIGGER insert_message_view_trig
@@ -27,26 +46,59 @@ CREATE TRIGGER insert_message_view_trig
     FOR EACH ROW
     EXECUTE PROCEDURE public.insert_message_view_func();
 	
-CREATE OR REPLACE FUNCTION public.insert_message_view_func()
+ALTER FUNCTION public.insert_message_view_func()
+    OWNER TO admin;
+
+CREATE OR REPLACE FUNCTION public.delete_message_view_func()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+AS $BODY$
+BEGIN
+  DELETE FROM message WHERE id = OLD.id;
+  RETURN NEW;
+END;
+$BODY$;
+
+-- DROP TRIGGER delete_message_view_trig ON public.message_view;
+
+CREATE TRIGGER delete_message_view_trig
+    INSTEAD OF DELETE
+    ON public.message_view
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.delete_message_view_func();
+	
+ALTER FUNCTION public.delete_message_view_func()
+    OWNER TO admin;
+
+CREATE OR REPLACE FUNCTION public.update_message_view_func()
     RETURNS trigger
     LANGUAGE 'plpgsql'
 AS $BODY$
 DECLARE
-tmp RECORD;
+principal_id uuid;
 BEGIN
-  WITH input (id, mime_type, received_at, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, sender) as (
-     values (NEW.id, NEW.mime_type, NEW.received_at, NEW.sent_at, NEW.subject, NEW.created_at, NEW.uufid, NEW.uumid, NEW.uupid, NEW.uurn, NEW.meta, NEW.sender)
-  ) 
-  INSERT INTO message(id, mime_type, received_at, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, sender_id)
-  SELECT input.id, mime_type, received_at, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, principal.id
-  FROM input 
-  LEFT JOIN principal ON input.sender = principal.uupn
-  RETURNING id INTO tmp;
-  NEW.id = tmp.id;
+  principal_id := (SELECT id FROM "public".principal WHERE uupn = NEW.sender);
+  IF principal_id IS NULL
+  THEN
+    RAISE EXCEPTION 'Principal % is not registered.', NEW.sender;
+  END IF;
+  
+  UPDATE message SET
+     mime_type = NEW.mime_type,
+     subject = NEW.subject
+  WHERE id = OLD.id; 
   RETURN NEW;
 END;
-
 $BODY$;
 
-ALTER FUNCTION public.insert_message_view_func()
+-- DROP TRIGGER update_message_view_trig ON public.message_view;
+
+CREATE TRIGGER update_message_view_trig
+    INSTEAD OF UPDATE
+    ON public.message_view
+    FOR EACH ROW
+    EXECUTE PROCEDURE public.update_message_view_func();
+	
+ALTER FUNCTION public.update_message_view_func()
     OWNER TO admin;
+
