@@ -1,2 +1,2 @@
 ## Federizer
-Federizer is a digital postal system. It is a replacement for a traditional email system that no longer meets security standards and functional requirements.
+Federizer is an Identity-Based Proxy System. It serves as an AAA layer for Digital Postal System.
