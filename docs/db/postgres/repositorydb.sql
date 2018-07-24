@@ -96,8 +96,8 @@ BEGIN
     VALUES (account_id, NEW.sender);
   END IF;
   
-  INSERT INTO message(id, mime_type, received_at, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, body, plaintext, sender_id)
-  VALUES (NEW.id, NEW.mime_type, NEW.received_at, NEW.sent_at, NEW.subject, NEW.created_at, NEW.uufid, NEW.uumid, NEW.uupid, NEW.uurn, NEW.meta, NEW.body, NEW.plaintext, account_id);
+  INSERT INTO message(id, mime_type, sent_at, subject, created_at, uufid, uumid, uupid, uurn, meta, body, plaintext, sender_id)
+  VALUES (NEW.id, NEW.mime_type, NEW.sent_at, NEW.subject, NEW.created_at, NEW.uufid, NEW.uumid, NEW.uupid, NEW.uurn, NEW.meta, NEW.body, NEW.plaintext, account_id);
   RETURN NEW;
 END;
 $$;
@@ -180,6 +180,7 @@ CREATE TABLE public.envelope (
     uueid uuid NOT NULL,
     message_id uuid NOT NULL,
     recipient_id uuid NOT NULL,
+    received_at timestamp(6) without time zone,
     meta jsonb
 );
 
@@ -237,7 +238,6 @@ ALTER TABLE public.identity OWNER TO admin;
 CREATE TABLE public.message (
     id uuid NOT NULL,
     mime_type character varying(255) NOT NULL,
-    received_at timestamp(6) without time zone,
     sent_at timestamp(6) without time zone,
     subject character varying(255),
     created_at timestamp(6) without time zone NOT NULL,
@@ -279,7 +279,6 @@ ALTER TABLE public.message_properties OWNER TO admin;
 CREATE VIEW public.message_view AS
  SELECT message.id,
     message.mime_type,
-    message.received_at,
     message.sent_at,
     message.subject,
     message.created_at,
