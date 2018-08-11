@@ -85,9 +85,9 @@
      inkscape:window-height="1027"
      id="namedview4487"
      showgrid="false"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="372.61194"
-     inkscape:cy="348.70102"
+     inkscape:zoom="1"
+     inkscape:cx="360.37358"
+     inkscape:cy="508.70102"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -362,27 +362,27 @@
              inkscape:connector-curvature="0" /></g></g></g><text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-       x="348.22028"
+       x="333.22028"
        y="-165.97554"
        id="text4951"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4949"
-         x="348.22028"
+         x="333.22028"
          y="-165.97554"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">data</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">resources</tspan></text>
 <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-       x="484.89862"
+       x="489.39862"
        y="-285.98602"
        id="text4955"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4953"
-         x="484.89862"
+         x="489.39862"
          y="-285.98602"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">access control</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">permissions</tspan></text>
 <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
@@ -501,15 +501,15 @@
          inkscape:connector-curvature="0" /><text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.00000095px;line-height:1.25;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-         x="-69.377602"
-         y="5.1188869"
+         x="-39.486485"
+         y="3.6188853"
          id="text4891"
          transform="scale(1,-1)"><tspan
            sodipodi:role="line"
-           id="tspan4889"
-           x="-69.377602"
-           y="5.1188869"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">Resources</tspan></text>
+           x="-39.486485"
+           y="3.6188853"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';text-align:center;text-anchor:middle;stroke-width:0.75"
+           id="tspan4718">Gateway</tspan></text>
 </g><g
        id="g4531"
        transform="translate(950.90041,575.29981)"
@@ -520,15 +520,15 @@
          inkscape:connector-curvature="0" /><text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.00000095px;line-height:1.25;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-         x="-465.21121"
+         x="-445.71121"
          y="232.33348"
          id="text4891-6-3"
          transform="scale(1,-1)"><tspan
            sodipodi:role="line"
            id="tspan4889-9-2"
-           x="-465.21121"
+           x="-445.71121"
            y="232.33348"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">Switchboard</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">Policy</tspan></text>
 </g><g
        id="g4515"
        transform="translate(400.4004,461.7998)"

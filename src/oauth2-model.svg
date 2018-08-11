@@ -85,9 +85,9 @@
      inkscape:window-height="1027"
      id="namedview4487"
      showgrid="false"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="144.18128"
-     inkscape:cy="348.70102"
+     inkscape:zoom="1"
+     inkscape:cx="521.84652"
+     inkscape:cy="374.97519"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -362,27 +362,27 @@
              inkscape:connector-curvature="0" /></g></g></g><text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-       x="348.22028"
+       x="331.72028"
        y="-165.97554"
        id="text4951"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4949"
-         x="348.22028"
+         x="331.72028"
          y="-165.97554"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">data</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">resources</tspan></text>
 <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-       x="484.89862"
+       x="489.39862"
        y="-285.98602"
        id="text4955"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4953"
-         x="484.89862"
+         x="489.39862"
          y="-285.98602"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">access control</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">permissions</tspan></text>
 <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
@@ -502,19 +502,24 @@
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.00000095px;line-height:1.25;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro';letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
          x="-39.377602"
-         y="-2.3811133"
+         y="-12.881114"
          id="text4891"
          transform="scale(1,-1)"><tspan
            sodipodi:role="line"
-           id="tspan4889"
            x="-39.377602"
-           y="-2.3811133"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.75">Resource</tspan><tspan
+           y="-12.881114"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.75"
+           id="tspan6012">Resource</tspan><tspan
            sodipodi:role="line"
            x="-39.377602"
-           y="14.019374"
+           y="3.5193734"
            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.75"
-           id="tspan6012">Server</tspan></text>
+           id="tspan4640">Protection</tspan><tspan
+           sodipodi:role="line"
+           x="-39.377602"
+           y="19.919861"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.75"
+           id="tspan4642">Gateway</tspan></text>
 </g><g
        id="g4531"
        transform="translate(950.90041,575.29981)"
@@ -538,7 +543,7 @@
            x="-427.71121"
            y="241.23396"
            style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.75"
-           id="tspan6724">Proxy</tspan></text>
+           id="tspan6724">Server</tspan></text>
 </g><g
        id="g4515"
        transform="translate(400.4004,461.7998)"
