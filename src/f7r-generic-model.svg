@@ -23,7 +23,7 @@
    inkscape:export-ydpi="84.839996"><metadata
      id="metadata4491"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
      id="defs4489"><linearGradient
        inkscape:collect="always"
        id="linearGradient5982"><stop
@@ -86,8 +86,8 @@
      id="namedview4487"
      showgrid="false"
      inkscape:zoom="1"
-     inkscape:cx="185.37358"
-     inkscape:cy="508.70102"
+     inkscape:cx="281.39825"
+     inkscape:cy="428.70102"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -335,15 +335,15 @@
              inkscape:connector-curvature="0" /></g></g></g><text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
-       x="333.22028"
+       x="307.72028"
        y="-165.97554"
        id="text4951"
        transform="scale(1,-1)"><tspan
          sodipodi:role="line"
          id="tspan4949"
-         x="333.22028"
+         x="307.72028"
          y="-165.97554"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">resources</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Yu Gothic UI';-inkscape-font-specification:'Yu Gothic UI Bold';stroke-width:0.75">content resources</tspan></text>
 <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:13.00000095px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.75"
@@ -428,7 +428,7 @@
          style="display:inline;fill:#cdcccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1"
          d="m 410.56649,347.01786 c 0,-14.63 -22.253,-26.49 -49.704,-26.49 -27.451,0 -49.704,11.86 -49.704,26.49 0,14.63 22.253,26.49 49.704,26.49 27.451,0 49.704,-11.86 49.704,-26.49" /><text
          y="-342.59961"
-         x="332.9072"
+         x="334.4072"
          id="text4735"
          style="font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13px;font-family:'Myriad Pro';-inkscape-font-specification:MyriadPro-Bold;writing-mode:lr-tb;display:inline;fill:#231f20;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1"
          transform="scale(1,-1)"><tspan
@@ -436,7 +436,7 @@
            id="tspan4733"
            sodipodi:role="line"
            y="-342.59961"
-           x="332.9072">Processes</tspan></text>
+           x="334.4072">Activities</tspan></text>
 </g><path
        inkscape:connector-curvature="0"
        d="m 361.02798,298.73602 c -4.79863,0 -8.68531,-1.94334 -8.68531,-4.34266 0,-2.39932 3.88668,-4.34265 8.68531,-4.34265 4.79864,0 8.68532,1.94333 8.68532,4.34265 0,2.39932 -3.88668,4.34266 -8.68532,4.34266 m -8.68531,-6.51399 v -3.25699 c 0,-2.39932 3.88668,-4.34266 8.68531,-4.34266 4.79864,0 8.68532,1.94334 8.68532,4.34266 v 3.25699 c 0,-2.39931 -3.88668,-4.34265 -8.68532,-4.34265 -4.79863,0 -8.68531,1.94334 -8.68531,4.34265 m 0,-5.42832 v -3.25699 c 0,-2.39932 3.88668,-4.34266 8.68531,-4.34266 4.79864,0 8.68532,1.94334 8.68532,4.34266 v 3.25699 c 0,-2.39932 -3.88668,-4.34266 -8.68532,-4.34266 -4.79863,0 -8.68531,1.94334 -8.68531,4.34266 z"
