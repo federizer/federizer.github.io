@@ -22,7 +22,8 @@ CREATE TABLE labels.system_label (
     important bool NOT NULL DEFAULT false,
     chats bool NOT NULL DEFAULT false,
     spam bool NOT NULL DEFAULT false,
-    trash bool NOT NULL DEFAULT false
+    trash bool NOT NULL DEFAULT false,
+    unread bool NOT NULL DEFAULT true
 );
 
 CREATE SEQUENCE labels.user_label_id_seq
