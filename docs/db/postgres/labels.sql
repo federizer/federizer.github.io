@@ -35,10 +35,11 @@ CREATE SEQUENCE labels.user_label_id_seq
 
 CREATE TABLE labels.user_label (
     id bigint DEFAULT nextval('labels.user_label_id_seq'::regclass) NOT NULL,
+    owner character varying(255) NOT NULL,
     user_label_id bigint,
     filter_id bigint,
-    owner character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
+    search_name tsvector,
     created_at timestamp(6) with time zone DEFAULT now(),
     updated_at timestamp(6) with time zone
 );
@@ -62,9 +63,30 @@ ALTER TABLE ONLY labels.system_label
 ALTER TABLE ONLY labels.user_label
     ADD CONSTRAINT system_label_filter_fkey FOREIGN KEY (filter_id) REFERENCES filters.filter(id);
 
+CREATE INDEX idx_search_user_label_name ON labels.user_label USING gin (search_name);
+
+CREATE FUNCTION labels.user_label_table_inserted() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+	BEGIN				
+		NEW.search_name = to_tsvector(NEW.name);
+	
+		RETURN NEW;	
+	END; $$;
+
+
 CREATE FUNCTION labels.user_label_table_updated() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
-    AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;   
+    AS $$
+    BEGIN
+	   NEW.updated_at = now();
+
+	   NEW.search_name = to_tsvector(NEW.name);
+	   
+	  RETURN NEW;
+	END; $$;   
    
+CREATE TRIGGER user_label_inserted BEFORE INSERT ON labels.user_label FOR EACH ROW EXECUTE PROCEDURE labels.user_label_table_inserted();
+
 CREATE TRIGGER user_label_updated BEFORE UPDATE ON labels.user_label FOR EACH ROW EXECUTE PROCEDURE labels.user_label_table_updated();
       
