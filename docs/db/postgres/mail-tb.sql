@@ -9,7 +9,7 @@ CREATE SEQUENCE mail.message_id_seq
 
 CREATE TABLE mail.message (
     id bigint DEFAULT nextval('mail.message_id_seq'::regclass) NOT NULL,
-    sender character varying(255) NOT NULL,
+    sender_email_address character varying(255) NOT NULL,
     sender_display_name character varying(1024),
     subject text,
     body text,
@@ -66,15 +66,17 @@ CREATE SEQUENCE mail.envelope_id_seq
     NO MAXVALUE
     CACHE 1;
    
-CREATE TYPE mail.envelope_type AS ENUM ('primary', 'cc', 'bcc');      
+CREATE TYPE mail.envelope_type AS ENUM ('to', 'cc', 'bcc');      
 
 CREATE TABLE mail.envelope (
     id bigint DEFAULT nextval('mail.envelope_id_seq'::regclass) NOT NULL,
     message_id bigint NOT NULL,
-    type mail.envelope_type NOT NULL DEFAULT 'primary',
-    recipient character varying(255) NOT NULL,
+    type mail.envelope_type NOT NULL DEFAULT 'to',
+    recipient_email_address character varying(255) NOT NULL,
     recipient_display_name character varying(1024),
     search_to tsvector,
+    search_cc tsvector,
+    search_bcc tsvector,
     created_at timestamp(6) with time zone DEFAULT now()
 );
 
@@ -87,7 +89,7 @@ CREATE FUNCTION mail.message_table_inserted() RETURNS trigger
 		--search_body = regexp_replace(regexp_replace(NEW.body, E'(?x)<[^>]*?(\s alt \s* = \s* ([\'"]) ([^>]*?) \2) [^>]*? >', E'\3'), E'(?x)(< [^>]*? >)', '', 'g');
 		search_body = regexp_replace(NEW.body, E'<[^>]+>', '', 'gi');
 	
-		NEW.search_from = to_tsvector(NEW.sender ||	', ' ||	NEW.sender_display_name);
+		NEW.search_from = to_tsvector(NEW.sender_email_address ||	', ' ||	NEW.sender_display_name);
 		NEW.search_subject = to_tsvector(NEW.subject);
 		NEW.search_body = to_tsvector(search_body);
 	
@@ -105,7 +107,7 @@ CREATE FUNCTION mail.message_table_updated() RETURNS trigger
 		--search_body = regexp_replace(regexp_replace(NEW.body, E'(?x)<[^>]*?(\s alt \s* = \s* ([\'"]) ([^>]*?) \2) [^>]*? >', E'\3'), E'(?x)(< [^>]*? >)', '', 'g');
 		search_body = regexp_replace(NEW.body, E'<[^>]+>', '', 'gi');
 	
-		NEW.search_from = to_tsvector(NEW.sender ||	', ' ||	NEW.sender_display_name);
+		NEW.search_from = to_tsvector(NEW.sender_email_address ||	', ' ||	NEW.sender_display_name);
 		NEW.search_subject = to_tsvector(NEW.subject);
 		NEW.search_body = to_tsvector(search_body);
 	
@@ -138,11 +140,30 @@ CREATE FUNCTION mail.tag_table_inserted() RETURNS trigger
 CREATE FUNCTION mail.envelope_table_inserted() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
-	BEGIN				
-		NEW.search_to = to_tsvector(NEW.recipient ||	', ' ||	NEW.recipient_display_name);
+	DECLARE
+	recipient_data text;
+	begin
+		recipient_data = NEW.recipient_email_address ||	', ' ||	NEW.recipient_display_name;
+		if NEW.type = 'to' then
+			NEW.search_to = to_tsvector(recipient_data);
+		elsif NEW.type = 'cc' then
+			NEW.search_cc = to_tsvector(recipient_data);
+		elsif NEW.type = 'bcc' then
+			NEW.search_bcc = to_tsvector(recipient_data);
+		end if;
 	
 		RETURN NEW;	
 	END; $$;
+
+CREATE OR REPLACE FUNCTION mail.prevent_update()
+  RETURNS trigger AS
+$BODY$
+    BEGIN
+        RAISE EXCEPTION 'update not allowed';
+    END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
 
 ALTER TABLE ONLY mail.message
     ADD CONSTRAINT message_pkey PRIMARY KEY (id);
@@ -173,13 +194,15 @@ CREATE INDEX idx_search_attachment_body ON mail.attachment USING gin (search_con
 CREATE INDEX idx_search_tag_name ON mail.tag USING gin (search_name);
 CREATE INDEX idx_search_tag_value ON mail.tag USING gin (search_value);
 CREATE INDEX idx_search_envelope_to ON mail.envelope USING gin (search_to);
+CREATE INDEX idx_search_envelope_cc ON mail.envelope USING gin (search_cc);
+CREATE INDEX idx_search_envelope_bcc ON mail.envelope USING gin (search_bcc);
 
 CREATE TRIGGER mail_message_inserted BEFORE INSERT ON mail.message FOR EACH ROW EXECUTE PROCEDURE mail.message_table_inserted();
-
 CREATE TRIGGER mail_message_updated BEFORE UPDATE ON mail.message FOR EACH ROW EXECUTE PROCEDURE mail.message_table_updated();
-
 CREATE TRIGGER mail_attachment_inserted BEFORE INSERT ON mail.attachment FOR EACH ROW EXECUTE PROCEDURE mail.attachment_table_inserted();
-
 CREATE TRIGGER mail_tag_inserted BEFORE INSERT ON mail.tag FOR EACH ROW EXECUTE PROCEDURE mail.tag_table_inserted();
-
 CREATE TRIGGER mail_envelope_inserted BEFORE INSERT ON mail.envelope FOR EACH ROW EXECUTE PROCEDURE mail.envelope_table_inserted();
+
+CREATE TRIGGER mail_prevent_update BEFORE UPDATE ON mail.attachment FOR EACH ROW EXECUTE PROCEDURE mail.prevent_update();
+CREATE TRIGGER mail_prevent_update BEFORE UPDATE ON mail.envelope FOR EACH ROW EXECUTE PROCEDURE mail.prevent_update();
+CREATE TRIGGER mail_prevent_update BEFORE UPDATE ON mail.tag FOR EACH ROW EXECUTE PROCEDURE mail.prevent_update();
