@@ -3,7 +3,7 @@ SELECT mail.message.id,
 			jsonb_build_object('email_address', mail.message.sender_email_address, 'display_name', mail.message.sender_display_name) AS sender,
 			mail.message.subject,
 			mail.message.body,
-			json_object_agg(type, recipient ORDER BY type) AS recipient,
+			jsonb_object_agg(type, recipient ORDER BY type) AS recipient,
 			mail.message.created_at,
 			mail.message.updated_at
 FROM mail.message LEFT JOIN (SELECT
