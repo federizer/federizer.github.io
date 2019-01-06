@@ -8,14 +8,14 @@ CREATE SEQUENCE labels.system_label_id_seq
     NO MAXVALUE
     CACHE 1;
    
-CREATE TYPE labels.exclusive_values AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
+CREATE TYPE labels.folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
 
 CREATE TABLE labels.system_label (
     id bigint DEFAULT nextval('labels.system_label_id_seq'::regclass) NOT NULL,
     owner character varying(255) NOT NULL,
     message_id bigint NOT NULL,
     user_label_id bigint,
-    state labels.exclusive_values NOT NULL DEFAULT 'inbox',
+    folder labels.folders NOT NULL DEFAULT 'inbox',
     done bool NOT NULL DEFAULT false,
     archived bool NOT NULL DEFAULT false,
     starred bool NOT NULL DEFAULT false,

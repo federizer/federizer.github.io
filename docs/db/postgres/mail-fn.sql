@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION mail.read_message(IN _message_id int8)
+CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _message_id int8, IN _system_label_folder labels.folders, IN _system_label_status int2, IN _user_label character varying)
   RETURNS TABLE(id int8,
 				sender jsonb,
                 subject text,
@@ -8,6 +8,9 @@ CREATE OR REPLACE FUNCTION mail.read_message(IN _message_id int8)
                 updated_at timestamptz) AS
 $BODY$
 begin
+	IF coalesce(TRIM(_owner), '') = '' THEN
+		RAISE EXCEPTION '_owner is required.';
+	END IF;
 	RETURN QUERY
 	SELECT mail.message.id,
 				jsonb_build_object('email_address', mail.message.sender_email_address, 'display_name', mail.message.sender_display_name) AS sender,
@@ -34,5 +37,9 @@ $BODY$
 LANGUAGE plpgsql VOLATILE;
 
 /*SELECT * from mail.read_message(
-	:_message_id 	-- put the _message_id parameter value instead of '_message_id' (int8)
+	:_owner,	-- put the _owner parameter value instead of '_owner' (varchar)
+	:_message_id,	-- put the _message_id parameter value instead of '_message_id' (int8)
+	:_system_label_folder,	-- put the _system_label_folder parameter value instead of '_system_label_folder' (folders)
+	:_system_label_status,	-- put the _system_label_status parameter value instead of '_system_label_status' (int2)
+	:_user_label 	-- put the _user_label parameter value instead of '_user_label' (varchar)
 );*/
