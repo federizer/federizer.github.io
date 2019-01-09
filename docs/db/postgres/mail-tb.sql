@@ -37,7 +37,7 @@ CREATE TABLE mail.attachment (
     mimetype character varying(255) NOT NULL,
     encoding character varying(255) NOT NULL,
     size bigint NOT NULL,
-    content text,
+    --content text,
     search_name tsvector,
     search_content tsvector,
     created_at timestamp(6) with time zone DEFAULT now()
