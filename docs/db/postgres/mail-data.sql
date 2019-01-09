@@ -51,8 +51,8 @@ INSERT INTO labels.system_label
 VALUES('jdoe@leadict.com', 1, 'sent', true, true);
 
 INSERT INTO labels.system_label
-(owner, message_id, folder, important)
-VALUES('jdoe@leadict.com', 1, 'sent', true);
+(owner, message_id, folder, important, unread)
+VALUES('izboran@gmail.com', 1, 'inbox', true, true);
 
 INSERT INTO labels.system_label
 (owner, message_id, folder)
