@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _message_id int8, IN _system_label_folder labels.folders, IN _system_label_label_bits int4, IN _user_label character varying)
+CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _message_id int8, IN _system_label_folder labels.folders, IN _system_label_label_bits int4, IN _custom_label jsonb)
   RETURNS TABLE(id int8,
 				sender jsonb,
                 subject text,
@@ -6,6 +6,7 @@ CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _me
                 envelopes jsonb,
                 system_folder labels.folders,
                 system_labels jsonb,
+                custom_labels jsonb,
                 attachments jsonb,
                 tags jsonb,
                 sent_at timestamptz,
@@ -24,6 +25,7 @@ begin
 			e.envelopes,
 			sl.folder AS system_folder,
 			sl.labels AS system_labels,
+			cl.labels AS custom_labels,
 			a.attachments,
 			t.tags,
 			m.sent_at,
@@ -41,19 +43,22 @@ begin
   	ON u.id = t.message_id
 	LEFT JOIN labels.system_label_vw sl
   	ON u.id = sl.message_id AND sl.owner = _owner
+	LEFT JOIN labels.custom_label_vw cl
+  	ON u.id = cl.message_id AND cl.owner = _owner
 	WHERE (_message_id IS NULL OR u.id = _message_id) AND
 		  (_system_label_folder IS NULL OR sl.folder = _system_label_folder) AND
-		  (_system_label_label_bits IS NULL OR (sl.label_bits & _system_label_label_bits) > 0 OR (COALESCE(sl.label_bits, 0) | _system_label_label_bits) = 0);
+		  (_system_label_label_bits IS NULL OR (sl.label_bits & _system_label_label_bits) > 0 OR (COALESCE(sl.label_bits, 0) | _system_label_label_bits) = 0) AND
+		  (_custom_label IS NULL OR _custom_label ?| (ARRAY(select * from jsonb_array_elements_text(cl.labels))) OR (_custom_label = COALESCE(cl.labels, '[]'::jsonb)));
 END;	   
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
 /*SELECT * from mail.read_message(
-	:_owner,	-- put the _owner parameter value instead of '_owner' (varchar)
-	:_message_id,	-- put the _message_id parameter value instead of '_message_id' (int8)
-	:_system_label_folder,	-- put the _system_label_folder parameter value instead of '_system_label_folder' (folders)
-	:_system_label_label_bits,	-- put the _system_label_label_bits parameter value instead of '_system_label_label_bits' (int4)
-	:_user_label 	-- put the _user_label parameter value instead of '_user_label' (varchar)
+	:_owner,	-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	:_message_id,	-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
+	:_system_label_folder,	-- put the _system_label_folder parameter value instead of '_system_label_folder' (folders) NULL, 'inbox', 'snoozed', 'sent', 'drafts'
+	:_system_label_label_bits,	-- put the _system_label_label_bits parameter value instead of '_system_label_label_bits' (int4) NULL, 0, 123
+	:_custom_label 	-- put the _custom_label parameter value instead of '_custom_label' (jsonb) NULL, '[]', '["John Doe", "Igor"]'
 );*/
 
 

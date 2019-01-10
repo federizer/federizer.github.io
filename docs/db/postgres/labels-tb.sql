@@ -73,6 +73,9 @@ ALTER TABLE ONLY labels.has
     ADD CONSTRAINT has_message_custom_label_unique UNIQUE (owner, message_id, custom_label_id); 
    
 ALTER TABLE ONLY labels.custom_label
+    ADD CONSTRAINT custom_label_id_unique UNIQUE (owner, id);
+
+ALTER TABLE ONLY labels.custom_label
     ADD CONSTRAINT custom_label_name_unique UNIQUE (owner, name);
 
 ALTER TABLE ONLY labels.system_label
@@ -85,7 +88,7 @@ CREATE INDEX idx_search_custom_label_name ON labels.custom_label USING gin (sear
 
 ALTER TABLE ONLY labels.has
     ADD CONSTRAINT has_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id),
-    ADD CONSTRAINT has_custom_label_fkey FOREIGN KEY (custom_label_id) REFERENCES labels.custom_label(id);
+    ADD CONSTRAINT has_custom_label_fkey FOREIGN KEY (owner, custom_label_id) REFERENCES labels.custom_label(owner, id);
    
 CREATE FUNCTION labels.custom_label_table_inserted() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER

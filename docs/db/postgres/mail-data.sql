@@ -65,6 +65,36 @@ VALUES('jdoe@leadict.com', 3, 'inbox', true);
 INSERT INTO labels.system_label
 (owner, message_id, folder, unread)
 VALUES('tsawyer@leadict.com', 3, 'inbox', false);
+--labels.custom_label-------------------------------------------------------------------------------------------------------------
+INSERT INTO labels.custom_label
+(owner, name)
+VALUES('jdoe@leadict.com', 'Igor');
+INSERT INTO labels.custom_label
+(owner, name)
+VALUES('jdoe@leadict.com', 'Testing');
+INSERT INTO labels.custom_label
+(owner, name)
+VALUES('izboran@gmail.com', 'John Doe');
+INSERT INTO labels.custom_label
+(owner, name)
+VALUES('izboran@gmail.com', 'Testing');
+
+INSERT INTO labels.has
+(owner, message_id, custom_label_id)
+VALUES('jdoe@leadict.com', 3, 1);
+INSERT INTO labels.has
+(owner, message_id, custom_label_id)
+VALUES('jdoe@leadict.com', 3, 2);
+INSERT INTO labels.has
+(owner, message_id, custom_label_id)
+VALUES('jdoe@leadict.com', 4, 2);
+INSERT INTO labels.has
+(owner, message_id, custom_label_id)
+VALUES('izboran@gmail.com', 1, 3);
+INSERT INTO labels.has
+(owner, message_id, custom_label_id)
+VALUES('izboran@gmail.com', 1, 4);
+
 --mail.attachment-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.attachment
 (message_id, destination, filename, name, mimetype, encoding, size)

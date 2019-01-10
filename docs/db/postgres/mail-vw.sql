@@ -52,3 +52,13 @@ SELECT sl.message_id,
      || sl.unread::int::bit)::bit(8)::int4 AS label_bits									
 
    FROM labels.system_label sl;
+   
+CREATE OR REPLACE VIEW labels.custom_label_vw AS
+SELECT h.message_id,
+		h.owner,
+		jsonb_agg(to_jsonb(cl.name) ORDER BY cl.id) AS labels									
+
+   FROM labels.has h
+   LEFT JOIN labels.custom_label cl
+   ON h.owner = cl.owner AND h.custom_label_id = cl.id
+   GROUP BY h.message_id, h.owner;
