@@ -1,5 +1,4 @@
---CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _message_id int8, IN IN q character varying, IN _limit int4, IN _page_token  character varying)
-CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _message_id int8, IN _system_label_folders jsonb, IN _system_label_labels jsonb, IN _custom_label_labels jsonb, IN _limit int4)
+CREATE OR REPLACE FUNCTION mail.read_message(IN _owner character varying, IN _message_id int8, IN _system_label_folders jsonb, IN _system_label_labels jsonb, IN _custom_label_labels jsonb, IN _limit int4, IN _page int4)
   RETURNS TABLE(id int8,
 				sender jsonb,
                 subject text,
@@ -29,8 +28,18 @@ BEGIN
 	_system_label_labels_arr = ARRAY(SELECT jsonb_array_elements_text(_system_label_labels))::text[8];
 	-- check custom_label.labels
 	_custom_label_labels_arr = ARRAY(SELECT jsonb_array_elements_text(_custom_label_labels))::text[];
-	IF _limit IS NULL OR _limit > 100 THEN
+	IF _limit IS NULL THEN
 		_limit = 100;
+	END IF;
+	IF _limit > 100 THEN
+		RAISE EXCEPTION '_limit must be less then 101.';
+	END IF;
+	-- todo: use _page_token instead of _page
+	IF _page IS NULL THEN
+		_page = 1;
+	END IF;
+	IF _page > 1000 THEN
+		RAISE EXCEPTION '_page must be less then 1001.';
 	END IF;
 	RETURN QUERY
 	SELECT  mu.id,
@@ -74,19 +83,20 @@ BEGIN
 		  (_system_label_labels IS NULL OR (_system_label_labels ?& (ARRAY(select * from jsonb_array_elements_text(sl.labels))) AND (_system_label_labels = COALESCE(sl.labels, '[]'::jsonb)))) AND
 		  (_custom_label_labels IS NULL OR (_custom_label_labels ?| (ARRAY(select * from jsonb_array_elements_text(cl.labels))) OR (_custom_label_labels = COALESCE(cl.labels, '[]'::jsonb))))
 	ORDER BY mu.sent_at DESC, mu.updated_at DESC, mu.created_at DESC, mu.id DESC
-	LIMIT _limit;
+	LIMIT _limit OFFSET (_page - 1) * _limit; -- LIMIT {itemsPerPage} OFFSET {(page - 1) * itemsPerPage}
 END;	   
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
 /*
 SELECT * from mail.read_message(
-	'jdoe@leadict.com',				-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'izboran@gmail.com',				-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	NULL,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
 	NULL,							-- put the _system_label_folders parameter value instead of '_system_label_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
 	NULL,							-- put the _system_label_labels parameter value instead of '_system_label_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "trash", "unread"]' -- 'and' between values --
 	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
-	NULL							-- put the _limit parameter value instead of '_limit' (int4) NULL, 100 -- max. value is 100 --
+	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 24 -- max. value is 100 --
+	NULL							-- put the _page parameter value instead of '_page' (int4) NULL, 1 -- max. value is 1000 --
 )
 */
 
