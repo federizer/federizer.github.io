@@ -9,6 +9,7 @@ CREATE SEQUENCE labels.system_label_id_seq
     CACHE 1;
    
 CREATE TYPE labels.folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
+CREATE TYPE labels.labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'trash', 'unread');
 
 CREATE TABLE labels.system_label (
     id bigint DEFAULT nextval('labels.system_label_id_seq'::regclass) NOT NULL,
