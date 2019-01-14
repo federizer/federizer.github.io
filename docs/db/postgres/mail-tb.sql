@@ -1,19 +1,21 @@
+DROP SCHEMA mail CASCADE;
 CREATE SCHEMA mail;
-
-CREATE SEQUENCE mail.message_id_seq
+   
+CREATE SEQUENCE mail.timeline_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
-    CACHE 1;
+    CACHE 1;   
 
 CREATE TABLE mail.message (
-    id bigint DEFAULT nextval('mail.message_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     sender_email_address character varying(255) NOT NULL,
     sender_display_name character varying(1024),
     subject text,
     body text,
     sent_at timestamp(6) with time zone,
+    sender_timeline_id bigint DEFAULT nextval('mail.timeline_id_seq'::regclass) NOT NULL,
     search_from tsvector,
     search_subject tsvector,
     search_body tsvector,
@@ -21,15 +23,8 @@ CREATE TABLE mail.message (
     updated_at timestamp(6) with time zone
 );
 
-CREATE SEQUENCE mail.attachment_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 CREATE TABLE mail.attachment (
-    id bigint DEFAULT nextval('mail.attachment_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     message_id bigint NOT NULL,
     destination character varying(4096) NOT NULL,
     filename character varying(255) NOT NULL,
@@ -37,21 +32,14 @@ CREATE TABLE mail.attachment (
     mimetype character varying(255) NOT NULL,
     encoding character varying(255) NOT NULL,
     size bigint NOT NULL,
-    --content text,
+    content text,
     search_name tsvector,
     search_content tsvector,
     created_at timestamp(6) with time zone DEFAULT now()
 );
 
-CREATE SEQUENCE mail.tag_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 CREATE TABLE mail.tag (
-    id bigint DEFAULT nextval('mail.tag_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     message_id bigint NOT NULL,
     name character varying(255) NOT NULL,
     value character varying(255),
@@ -60,22 +48,17 @@ CREATE TABLE mail.tag (
     created_at timestamp(6) with time zone DEFAULT now()
 );
 
-CREATE SEQUENCE mail.envelope_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-   
 CREATE TYPE mail.envelope_type AS ENUM ('to', 'cc', 'bcc');      
 
 CREATE TABLE mail.envelope (
-    id bigint DEFAULT nextval('mail.envelope_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     message_id bigint NOT NULL,
     type mail.envelope_type NOT NULL DEFAULT 'to',
     recipient_email_address character varying(255) NOT NULL,
     recipient_display_name character varying(1024),
     received_at timestamp(6) with time zone,
+    snoozed_at timestamp(6) with time zone,
+    recipient_timeline_id bigint DEFAULT nextval('mail.timeline_id_seq'::regclass) NOT NULL,
     search_to tsvector,
     search_cc tsvector,
     search_bcc tsvector,
@@ -105,6 +88,7 @@ CREATE FUNCTION mail.message_table_updated() RETURNS trigger
 	search_body text;
 	BEGIN
 	  	NEW.updated_at = now();
+	  	NEW.sender_timeline_id := nextval('mail.timeline_id_seq'::regclass);
 	
 		--search_body = regexp_replace(regexp_replace(NEW.body, E'(?x)<[^>]*?(\s alt \s* = \s* ([\'"]) ([^>]*?) \2) [^>]*? >', E'\3'), E'(?x)(< [^>]*? >)', '', 'g');
 		search_body = regexp_replace(NEW.body, E'<[^>]+>', '', 'gi');
@@ -124,7 +108,7 @@ CREATE FUNCTION mail.attachment_table_inserted() RETURNS trigger
 	search_content text;
 	BEGIN				
 		NEW.search_name = to_tsvector(NEW.name);
-		--NEW.search_content = to_tsvector(search_content);
+		NEW.search_content = to_tsvector(search_content);
 	
 		RETURN NEW;	
 	END; $$;
@@ -157,6 +141,20 @@ CREATE FUNCTION mail.envelope_table_inserted() RETURNS trigger
 		RETURN NEW;	
 	END; $$;
 
+CREATE FUNCTION mail.envelope_table_updated() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+	BEGIN
+		IF NEW.recipient_email_address <> OLD.recipient_email_address OR
+		   NEW.recipient_display_name <> OLD.recipient_display_name THEN
+        	RAISE EXCEPTION 'update not allowed' USING hint = 'Changes to recipient email address or display name are not allowed.';
+       END IF;
+
+        NEW.recipient_timeline_id := nextval('mail.timeline_id_seq'::regclass);
+	
+	    RETURN NEW; 
+	END; $$;
+
 CREATE OR REPLACE FUNCTION mail.prevent_update()
   RETURNS trigger AS
 $BODY$
@@ -168,17 +166,11 @@ $BODY$
   COST 100;
 
 ALTER TABLE ONLY mail.message
-    ADD CONSTRAINT message_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY mail.attachment
-    ADD CONSTRAINT attachment_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY mail.tag
-    ADD CONSTRAINT tag_pkey PRIMARY KEY (id);
-
+    ADD CONSTRAINT message_sender_timeline_unique UNIQUE (sender_timeline_id);
+   
 ALTER TABLE ONLY mail.envelope
-    ADD CONSTRAINT envelope_pkey PRIMARY KEY (id);
-
+    ADD CONSTRAINT envelope_recipient_timeline_unique UNIQUE (recipient_timeline_id);
+   
 ALTER TABLE ONLY mail.attachment
     ADD CONSTRAINT attachment_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
 
@@ -186,7 +178,7 @@ ALTER TABLE ONLY mail.tag
     ADD CONSTRAINT tag_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
 
 ALTER TABLE ONLY mail.envelope
-    ADD CONSTRAINT envelope_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
+    ADD CONSTRAINT envelope_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);   
 
 CREATE INDEX idx_search_message_from ON mail.message USING gin (search_from);
 CREATE INDEX idx_search_message_subject ON mail.message USING gin (search_subject);
@@ -204,7 +196,7 @@ CREATE TRIGGER mail_message_updated BEFORE UPDATE ON mail.message FOR EACH ROW E
 CREATE TRIGGER mail_attachment_inserted BEFORE INSERT ON mail.attachment FOR EACH ROW EXECUTE PROCEDURE mail.attachment_table_inserted();
 CREATE TRIGGER mail_tag_inserted BEFORE INSERT ON mail.tag FOR EACH ROW EXECUTE PROCEDURE mail.tag_table_inserted();
 CREATE TRIGGER mail_envelope_inserted BEFORE INSERT ON mail.envelope FOR EACH ROW EXECUTE PROCEDURE mail.envelope_table_inserted();
+CREATE TRIGGER mail_envelope_updated BEFORE UPDATE ON mail.envelope FOR EACH ROW EXECUTE PROCEDURE mail.envelope_table_updated();
 
 CREATE TRIGGER mail_prevent_update BEFORE UPDATE ON mail.attachment FOR EACH ROW EXECUTE PROCEDURE mail.prevent_update();
-CREATE TRIGGER mail_prevent_update BEFORE UPDATE ON mail.envelope FOR EACH ROW EXECUTE PROCEDURE mail.prevent_update();
 CREATE TRIGGER mail_prevent_update BEFORE UPDATE ON mail.tag FOR EACH ROW EXECUTE PROCEDURE mail.prevent_update();

@@ -1,23 +1,14 @@
+DROP SCHEMA filters CASCADE;
 CREATE SCHEMA filters;
 
-CREATE SEQUENCE filters.filter_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 CREATE TABLE filters.filter (
-    id bigint DEFAULT nextval('filters.filter_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     name character varying(255),
     criteria text NOT NULL,
     created_at timestamp(6) with time zone DEFAULT now(),
     updated_at timestamp(6) with time zone
 );
-
-ALTER TABLE ONLY filters.filter
-    ADD CONSTRAINT filter_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY filters.filter
     ADD CONSTRAINT name_unique UNIQUE (owner, name);   

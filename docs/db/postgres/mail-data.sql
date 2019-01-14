@@ -1,20 +1,20 @@
---mail.message-------------------------------------------------------------------------------------------------------------
+--mail.message create-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.message
-(sender_email_address, sender_display_name, subject, body, sent_at)
-VALUES('jdoe@leadict.com', 'John Doe', 'Hello', 'Hello World!', '2019-01-06 10:21:04');
+(sender_email_address, sender_display_name, subject, body)
+VALUES('jdoe@leadict.com', 'John Doe', 'Hello', 'Hello World!');
 INSERT INTO mail.message
-(sender_email_address, sender_display_name, subject, body, sent_at)
-VALUES('jdoe@leadict.com', 'John Doe', 'Allo', 'Allo, Allo!', '2019-01-07 12:41:53');
+(sender_email_address, sender_display_name, subject, body)
+VALUES('jdoe@leadict.com', 'John Doe', 'Allo', 'Allo, Allo!');
 INSERT INTO mail.message
-(sender_email_address, sender_display_name, subject, body, sent_at)
-VALUES('izboran@gmail.com', 'Igor Zboran', 'Hello again', 'Hello everybody!', '2019-01-07 17:08:29');
+(sender_email_address, sender_display_name, subject, body)
+VALUES('izboran@gmail.com', 'Igor Zboran', 'Hello again', 'Hello everybody!');
 INSERT INTO mail.message
 (sender_email_address, sender_display_name, subject, body)
 VALUES('izboran@gmail.com', 'Igor Zboran', 'Invoice1', '124€');
 INSERT INTO mail.message
 (sender_email_address, sender_display_name, subject, body)
 VALUES('izboran@gmail.com', 'Igor Zboran', 'Invoice2', '15,25€');
---mail.envelope-------------------------------------------------------------------------------------------------------------
+--mail.envelope create-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.envelope
 (message_id, "type", recipient_email_address, recipient_display_name)
 VALUES(1, 'to', 'izboran@gmail.com', 'Igor Zboran');
@@ -45,6 +45,31 @@ VALUES(3, 'cc', 'tsawyer@leadict.com', 'Tom Sawyer');
 INSERT INTO mail.envelope
 (message_id, "type", recipient_email_address, recipient_display_name)
 VALUES(4, 'to', 'jdoe@leadict.com', 'John Doe');
+--mail.message & mail.envelope update------------------------------------------------------------------------------------------------------
+UPDATE mail.message SET
+sent_at = '2019-02-06 10:21:04'
+WHERE id = 1;
+UPDATE mail.envelope SET
+received_at = '2019-02-06 10:21:04'
+WHERE message_id = 1;
+UPDATE mail.message SET
+sent_at = '2019-02-07 12:41:53'
+WHERE id = 2;
+UPDATE mail.envelope SET
+received_at = '2019-02-07 12:41:53'
+WHERE message_id = 2;
+UPDATE mail.message SET
+sent_at = '2019-02-07 17:08:29'
+WHERE id = 3;
+UPDATE mail.envelope SET
+received_at = '2019-02-08 07:04:09'
+WHERE message_id = 3 AND id = 8;
+UPDATE mail.envelope SET
+received_at = '2019-02-08 10:01:45'
+WHERE message_id = 3 AND id = 7;
+UPDATE mail.envelope SET
+snoozed_at = '2019-02-09 06:30:00'
+WHERE message_id = 2 AND id = 4;
 --labels.system_label-------------------------------------------------------------------------------------------------------------
 INSERT INTO labels.system_label
 (owner, message_id, folder, starred, important)

@@ -3,6 +3,7 @@ SELECT m.id,
 		jsonb_build_object('email_address', m.sender_email_address, 'display_name', m.sender_display_name) AS sender,
 		m.subject,
 		m.body,
+		m.sender_timeline_id,
 		m.sent_at,
 		m.created_at,
 		m.updated_at
@@ -13,7 +14,7 @@ SELECT e.message_id,
        jsonb_object_agg(e.type, e.recipients ORDER BY e.type) AS envelopes
 FROM (SELECT envelope.message_id,
     envelope.type,
-    jsonb_agg(jsonb_build_object('email_address', envelope.recipient_email_address, 'display_name', envelope.recipient_display_name) ORDER BY envelope.id) AS recipients
+    jsonb_agg(jsonb_build_object('email_address', envelope.recipient_email_address, 'display_name', envelope.recipient_display_name, 'received_at', envelope.received_at, 'snoozed_at', envelope.snoozed_at) ORDER BY envelope.id) AS recipients
    FROM mail.envelope
    GROUP BY envelope.message_id, envelope.type) e
 GROUP BY e.message_id;

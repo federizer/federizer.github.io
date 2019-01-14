@@ -1,21 +1,15 @@
 --
+DROP SCHEMA labels CASCADE;
 CREATE SCHEMA labels;
 
-CREATE SEQUENCE labels.system_label_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-   
-CREATE TYPE labels.folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
-CREATE TYPE labels.labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'trash', 'unread');
+CREATE TYPE labels.system_folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
+CREATE TYPE labels.system_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'trash', 'unread');
 
 CREATE TABLE labels.system_label (
-    id bigint DEFAULT nextval('labels.system_label_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     message_id bigint NOT NULL,
-    folder labels.folders NOT NULL DEFAULT 'inbox',
+    folder labels.system_folders NOT NULL DEFAULT 'inbox',
     done bool NOT NULL DEFAULT false,
     archived bool NOT NULL DEFAULT false,
     starred bool NOT NULL DEFAULT false,
@@ -26,29 +20,15 @@ CREATE TABLE labels.system_label (
     unread bool NOT NULL DEFAULT false
 );
 
-CREATE SEQUENCE labels.has_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-   
 CREATE TABLE labels.has (
-    id bigint DEFAULT nextval('labels.has_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     message_id bigint NOT NULL,
     custom_label_id bigint NOT NULL
 );
 
-CREATE SEQUENCE labels.custom_label_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 CREATE TABLE labels.custom_label (
-    id bigint DEFAULT nextval('labels.custom_label_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     custom_label_id bigint,
     filter_id bigint,
@@ -57,15 +37,6 @@ CREATE TABLE labels.custom_label (
     created_at timestamp(6) with time zone DEFAULT now(),
     updated_at timestamp(6) with time zone
 );
-
-ALTER TABLE ONLY labels.system_label
-    ADD CONSTRAINT system_label_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY labels.has
-    ADD CONSTRAINT has_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY labels.custom_label
-    ADD CONSTRAINT custom_label_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY labels.system_label
     ADD CONSTRAINT system_label_message_unique UNIQUE (owner, message_id);
@@ -83,7 +54,8 @@ ALTER TABLE ONLY labels.system_label
     ADD CONSTRAINT system_label_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
 
 ALTER TABLE ONLY labels.custom_label
-    ADD CONSTRAINT system_label_filter_fkey FOREIGN KEY (filter_id) REFERENCES filters.filter(id);
+    ADD CONSTRAINT system_label_filter_fkey FOREIGN KEY (filter_id) REFERENCES filters.filter(id),
+    ADD CONSTRAINT custom_label_custom_label_fkey FOREIGN KEY (owner, custom_label_id) REFERENCES labels.custom_label(owner, id);
 
 CREATE INDEX idx_search_custom_label_name ON labels.custom_label USING gin (search_name);
 

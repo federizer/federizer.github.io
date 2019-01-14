@@ -1,14 +1,8 @@
+DROP SCHEMA contacts CASCADE;
 CREATE SCHEMA contacts;
 
-CREATE SEQUENCE contacts.person_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 CREATE TABLE contacts.person (
-    id bigint DEFAULT nextval('contacts.person_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     given_name character varying(255),
     surname character varying(255),
@@ -17,43 +11,20 @@ CREATE TABLE contacts.person (
     updated_at timestamp(6) with time zone
 );
 
-CREATE SEQUENCE contacts.belongs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-   
 CREATE TABLE contacts.belongs (
-    id bigint DEFAULT nextval('contacts.belongs_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     person_id bigint NOT NULL,
     group_id bigint NOT NULL
 );
 
-CREATE SEQUENCE contacts.group_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
 CREATE TABLE contacts.group (
-    id bigint DEFAULT nextval('contacts.group_id_seq'::regclass) NOT NULL,
+    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     name character varying(255) NOT NULL,
     created_at timestamp(6) with time zone DEFAULT now(),
     updated_at timestamp(6) with time zone
 );
-
-ALTER TABLE ONLY contacts.person
-    ADD CONSTRAINT person_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY contacts.belongs
-    ADD CONSTRAINT belongs_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY contacts.group
-    ADD CONSTRAINT group_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY contacts.person
     ADD CONSTRAINT person_email_address_unique UNIQUE (owner, email_address);   
