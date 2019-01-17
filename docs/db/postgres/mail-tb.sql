@@ -20,7 +20,8 @@ CREATE TABLE mail.message (
     search_subject tsvector,
     search_body tsvector,
     created_at timestamp(6) with time zone DEFAULT now(),
-    updated_at timestamp(6) with time zone
+    updated_at timestamp(6) with time zone,
+    deleted_at_sender bool NOT NULL DEFAULT false
 );
 
 CREATE TABLE mail.attachment (
@@ -41,6 +42,7 @@ CREATE TABLE mail.attachment (
 CREATE TABLE mail.tag (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     message_id bigint NOT NULL,
+    type smallint DEFAULT 0 NOT NULL,
     name character varying(255) NOT NULL,
     value character varying(255),
     search_name tsvector,
@@ -62,7 +64,8 @@ CREATE TABLE mail.envelope (
     search_to tsvector,
     search_cc tsvector,
     search_bcc tsvector,
-    created_at timestamp(6) with time zone DEFAULT now()
+    created_at timestamp(6) with time zone DEFAULT now(),
+    deleted_at_recipient bool NOT NULL DEFAULT false
 );
 
 CREATE FUNCTION mail.message_table_inserted() RETURNS trigger
@@ -160,6 +163,7 @@ CREATE OR REPLACE FUNCTION mail.prevent_update()
 $BODY$
     BEGIN
         RAISE EXCEPTION 'update not allowed';
+        RETURN NULL;
     END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
@@ -169,16 +173,22 @@ ALTER TABLE ONLY mail.message
     ADD CONSTRAINT message_sender_timeline_unique UNIQUE (sender_timeline_id);
    
 ALTER TABLE ONLY mail.envelope
+    ADD CONSTRAINT envelope_recipient_address_message_unique UNIQUE (recipient_email_address, message_id);
+
+ALTER TABLE ONLY mail.envelope
     ADD CONSTRAINT envelope_recipient_timeline_unique UNIQUE (recipient_timeline_id);
    
 ALTER TABLE ONLY mail.attachment
-    ADD CONSTRAINT attachment_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
+    ADD CONSTRAINT attachment_name_unique UNIQUE (name);
+   
+ALTER TABLE ONLY mail.attachment
+    ADD CONSTRAINT attachment_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY mail.tag
-    ADD CONSTRAINT tag_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
+    ADD CONSTRAINT tag_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY mail.envelope
-    ADD CONSTRAINT envelope_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);   
+    ADD CONSTRAINT envelope_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE;   
 
 CREATE INDEX idx_search_message_from ON mail.message USING gin (search_from);
 CREATE INDEX idx_search_message_subject ON mail.message USING gin (search_subject);

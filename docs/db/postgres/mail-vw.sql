@@ -27,7 +27,7 @@ GROUP BY a.message_id;
 		
 CREATE OR REPLACE VIEW mail.tag_vw AS	    
 SELECT message_id,
-		jsonb_agg(jsonb_build_object('name', t.name, 'value', t.value) ORDER BY t.id) AS tags
+		jsonb_agg(jsonb_build_object('type', t.type, 'name', t.name, 'value', t.value) ORDER BY t.id) AS tags
 FROM mail.tag t
 GROUP BY t.message_id;
 		
@@ -41,16 +41,16 @@ SELECT sl.message_id,
 									CASE WHEN sl.important THEN 'important' END,
 									CASE WHEN sl.chats THEN 'chats' END,
 									CASE WHEN sl.spam THEN 'spam' END,
-									CASE WHEN sl.trash THEN 'trash' END,
-									CASE WHEN sl.unread THEN 'unread' END], NULL)) AS "labels",
+									CASE WHEN sl.unread THEN 'unread' END,
+									CASE WHEN sl.trash THEN 'trash' END], NULL)) AS "labels",
 		(sl.done::int::bit
      || sl.archived::int::bit
      || sl.starred::int::bit
      || sl.important::int::bit
      || sl.chats::int::bit
      || sl.spam::int::bit
-     || sl.trash::int::bit
-     || sl.unread::int::bit)::bit(8)::int4 AS label_bits									
+     || sl.unread::int::bit
+     || sl.trash::int::bit)::bit(8)::int4 AS label_bits									
 
    FROM labels.system_label sl;
    

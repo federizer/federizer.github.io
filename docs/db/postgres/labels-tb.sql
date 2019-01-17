@@ -1,9 +1,8 @@
---
 DROP SCHEMA labels CASCADE;
 CREATE SCHEMA labels;
 
-CREATE TYPE labels.system_folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
-CREATE TYPE labels.system_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'trash', 'unread');
+CREATE TYPE labels.system_folders AS ENUM ('inbox', 'snoozed', 'sent', 'draft');   
+CREATE TYPE labels.system_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'unread', 'trash');
 
 CREATE TABLE labels.system_label (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
@@ -16,8 +15,8 @@ CREATE TABLE labels.system_label (
     important bool NOT NULL DEFAULT false,
     chats bool NOT NULL DEFAULT false,
     spam bool NOT NULL DEFAULT false,
-    trash bool NOT NULL DEFAULT false,
-    unread bool NOT NULL DEFAULT false
+    unread bool NOT NULL DEFAULT false,
+    trash bool NOT NULL DEFAULT false
 );
 
 CREATE TABLE labels.has (
@@ -51,7 +50,7 @@ ALTER TABLE ONLY labels.custom_label
     ADD CONSTRAINT custom_label_name_unique UNIQUE (owner, name);
 
 ALTER TABLE ONLY labels.system_label
-    ADD CONSTRAINT system_label_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id);
+    ADD CONSTRAINT system_label_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY labels.custom_label
     ADD CONSTRAINT system_label_filter_fkey FOREIGN KEY (filter_id) REFERENCES filters.filter(id),
@@ -60,7 +59,7 @@ ALTER TABLE ONLY labels.custom_label
 CREATE INDEX idx_search_custom_label_name ON labels.custom_label USING gin (search_name);
 
 ALTER TABLE ONLY labels.has
-    ADD CONSTRAINT has_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id),
+    ADD CONSTRAINT has_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE,
     ADD CONSTRAINT has_custom_label_fkey FOREIGN KEY (owner, custom_label_id) REFERENCES labels.custom_label(owner, id);
    
 CREATE FUNCTION labels.custom_label_table_inserted() RETURNS trigger

@@ -122,30 +122,31 @@ VALUES('izboran@gmail.com', 1, 4);
 
 --mail.attachment-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.attachment
-(message_id, destination, filename, name, mimetype, encoding, size)
+(message_id, destination, name, filename, mimetype, encoding, size)
 VALUES(1, './attachments/', '70d2d183-49da-4400-8318-de0275167a80', 'Hello World.txt', 'text/plain', '7bit', 14);
 INSERT INTO mail.attachment
-(message_id, destination, filename, name, mimetype, encoding, size)
+(message_id, destination, name, filename, mimetype, encoding, size)
 VALUES(3, './attachments/', '7e4763e8-098b-4fdd-9f1d-565366fd1fc3', 'Hello World.txt', 'text/plain', '7bit', 14);
 INSERT INTO mail.attachment
-(message_id, destination, filename, name, mimetype, encoding, size)
+(message_id, destination, name, filename, mimetype, encoding, size)
 VALUES(3, './attachments/', '114c0607-4bb4-4aca-ae8c-49ac558ac317', 'Java 8 Pocket Guide.pdf', 'application/pdf', '7bit', 8384695);
 INSERT INTO mail.attachment
-(message_id, destination, filename, name, mimetype, encoding, size)
+(message_id, destination, name, filename, mimetype, encoding, size)
 VALUES(4, './attachments/', '74aa8f05-f2a2-4da4-981d-e9728f7a4fcc', 'Hello World.txt', 'text/plain', '7bit', 14);
 --mail.tag-------------------------------------------------------------------------------------------------------------
+--'STRING': 0, 'NUMBER': 1, 'BOOLEAN': 2, 'DATE': 3, 'TIME': 4, 'DATETIME': 5
 INSERT INTO mail.tag
-(message_id, name, value)
-VALUES(1, 'Meeting', '2019-01-10 16:00:00');
+(message_id, type, name, value)
+VALUES(1, 5, 'Meeting', '2019-01-10 16:00:00');
 INSERT INTO mail.tag
-(message_id, name, value)
-VALUES(3, 'Invoice', '82,50€');
+(message_id, type, name, value)
+VALUES(3, 1, 'Invoice', '82,50'); -- $,€ currency ?
 INSERT INTO mail.tag
-(message_id, name, value)
-VALUES(3, 'Due date', '2019-01-31 23:59:59');
+(message_id, type, name, value)
+VALUES(3, 5, 'Due date', '2019-01-31 23:59:59');
 INSERT INTO mail.tag
-(message_id, name, value)
-VALUES(4, 'Meeting', '2019-01-17 14:00:00');
+(message_id, type, name, value)
+VALUES(4, 5, 'Meeting', '2019-01-17 14:00:00');
 INSERT INTO mail.tag
-(message_id, name)
-VALUES(4, 'Test tag');
+(message_id, type, name)
+VALUES(4, 0, 'Test tag');

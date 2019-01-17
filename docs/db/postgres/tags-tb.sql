@@ -1,6 +1,8 @@
 DROP SCHEMA tags CASCADE;
 CREATE SCHEMA tags;
 
+--'STRING': 0, 'NUMBER': 1, 'BOOLEAN': 2, 'DATE': 3, 'TIME': 4, 'DATETIME': 5
+
 CREATE TABLE tags.tag (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
