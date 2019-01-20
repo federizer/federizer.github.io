@@ -27,6 +27,12 @@ CREATE TABLE contacts.group (
 );
 
 ALTER TABLE ONLY contacts.person
+    ADD CONSTRAINT person_id_owner_unique UNIQUE (id, owner);
+
+ALTER TABLE ONLY contacts.group
+    ADD CONSTRAINT group_id_owner_unique UNIQUE (id, owner);
+
+ALTER TABLE ONLY contacts.person
     ADD CONSTRAINT person_email_address_unique UNIQUE (owner, email_address);   
    
 ALTER TABLE ONLY contacts.belongs
@@ -36,8 +42,8 @@ ALTER TABLE ONLY contacts.group
     ADD CONSTRAINT group_name_unique UNIQUE (owner, name);   
 
 ALTER TABLE ONLY contacts.belongs
-    ADD CONSTRAINT belongs_person_fkey FOREIGN KEY (person_id) REFERENCES contacts.person(id),
-    ADD CONSTRAINT belongs_group_fkey FOREIGN KEY (group_id) REFERENCES contacts.group(id);
+    ADD CONSTRAINT belongs_person_id_owner_person_fkey FOREIGN KEY (person_id, owner) REFERENCES contacts.person(id, owner),
+    ADD CONSTRAINT belongs_group_id_owner_group_fkey FOREIGN KEY (group_id, owner) REFERENCES contacts.group(id, owner);
    
 CREATE FUNCTION contacts.person_table_updated() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER

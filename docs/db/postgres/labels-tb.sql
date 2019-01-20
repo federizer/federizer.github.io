@@ -1,28 +1,10 @@
 DROP SCHEMA labels CASCADE;
 CREATE SCHEMA labels;
 
-CREATE TYPE labels.system_folders AS ENUM ('inbox', 'snoozed', 'sent', 'draft');   
-CREATE TYPE labels.system_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'unread', 'trash');
-
-CREATE TABLE labels.system_label (
-    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
-    owner character varying(255) NOT NULL,
-    message_id bigint NOT NULL,
-    folder labels.system_folders NOT NULL DEFAULT 'inbox',
-    done bool NOT NULL DEFAULT false,
-    archived bool NOT NULL DEFAULT false,
-    starred bool NOT NULL DEFAULT false,
-    important bool NOT NULL DEFAULT false,
-    chats bool NOT NULL DEFAULT false,
-    spam bool NOT NULL DEFAULT false,
-    unread bool NOT NULL DEFAULT false,
-    trash bool NOT NULL DEFAULT false
-);
-
 CREATE TABLE labels.has (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
-    message_id bigint NOT NULL,
+    mailbox_id bigint NOT NULL,
     custom_label_id bigint NOT NULL
 );
 
@@ -37,31 +19,25 @@ CREATE TABLE labels.custom_label (
     updated_at timestamp(6) with time zone
 );
 
-ALTER TABLE ONLY labels.system_label
-    ADD CONSTRAINT system_label_message_unique UNIQUE (owner, message_id);
-
 ALTER TABLE ONLY labels.has
-    ADD CONSTRAINT has_message_custom_label_unique UNIQUE (owner, message_id, custom_label_id); 
+    ADD CONSTRAINT has_message_custom_label_unique UNIQUE (owner, mailbox_id, custom_label_id); 
    
 ALTER TABLE ONLY labels.custom_label
-    ADD CONSTRAINT custom_label_id_unique UNIQUE (owner, id);
+    ADD CONSTRAINT custom_label_id_owner_unique UNIQUE (id, owner);
 
 ALTER TABLE ONLY labels.custom_label
-    ADD CONSTRAINT custom_label_name_unique UNIQUE (owner, name);
-
-ALTER TABLE ONLY labels.system_label
-    ADD CONSTRAINT system_label_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE;
+    ADD CONSTRAINT custom_label_name_owner_unique UNIQUE (name, owner);
 
 ALTER TABLE ONLY labels.custom_label
-    ADD CONSTRAINT system_label_filter_fkey FOREIGN KEY (filter_id) REFERENCES filters.filter(id),
-    ADD CONSTRAINT custom_label_custom_label_fkey FOREIGN KEY (owner, custom_label_id) REFERENCES labels.custom_label(owner, id);
+    ADD CONSTRAINT custom_label_filter_id_owner_fkey FOREIGN KEY (filter_id, owner) REFERENCES filters.filter(id, owner),
+    ADD CONSTRAINT custom_label_custom_label_fkey FOREIGN KEY (custom_label_id, owner) REFERENCES labels.custom_label(id, owner);
 
+ALTER TABLE ONLY labels.has
+    ADD CONSTRAINT has_mailbox_id_mailbox_owner_fkey FOREIGN KEY (mailbox_id, owner) REFERENCES postal.mailbox(id, owner) ON DELETE CASCADE,
+    ADD CONSTRAINT has_custom_label_id_owner_fkey FOREIGN KEY (custom_label_id, owner) REFERENCES labels.custom_label(id, owner);
+   
 CREATE INDEX idx_search_custom_label_name ON labels.custom_label USING gin (search_name);
 
-ALTER TABLE ONLY labels.has
-    ADD CONSTRAINT has_message_fkey FOREIGN KEY (message_id) REFERENCES mail.message(id) ON DELETE CASCADE,
-    ADD CONSTRAINT has_custom_label_fkey FOREIGN KEY (owner, custom_label_id) REFERENCES labels.custom_label(owner, id);
-   
 CREATE FUNCTION labels.custom_label_table_inserted() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$

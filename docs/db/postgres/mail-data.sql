@@ -70,26 +70,30 @@ WHERE message_id = 3 AND id = 7;
 UPDATE mail.envelope SET
 snoozed_at = '2019-02-09 06:30:00'
 WHERE message_id = 2 AND id = 4;
---labels.system_label-------------------------------------------------------------------------------------------------------------
-INSERT INTO labels.system_label
-(owner, message_id, folder, starred, important)
-VALUES('jdoe@leadict.com', 1, 'sent', true, true);
+--postal.mailbox-------------------------------------------------------------------------------------------------------------
+INSERT INTO postal.mailbox
+(owner, message_id, envelope_id, folder, starred, important)
+VALUES('jdoe@leadict.com', 1, NULL, 'sent', true, true);
 
-INSERT INTO labels.system_label
-(owner, message_id, folder, important, unread)
-VALUES('izboran@gmail.com', 1, 'inbox', true, true);
+INSERT INTO postal.mailbox
+(owner, message_id, envelope_id, folder, important, unread)
+VALUES('izboran@gmail.com', NULL, 1, 'inbox', true, true);
 
-INSERT INTO labels.system_label
-(owner, message_id, folder)
-VALUES('izboran@gmail.com', 3, 'sent');
+INSERT INTO postal.mailbox
+(owner, message_id, envelope_id, folder)
+VALUES('izboran@gmail.com', 3, NULL, 'sent');
 
-INSERT INTO labels.system_label
-(owner, message_id, folder, unread)
-VALUES('jdoe@leadict.com', 3, 'inbox', true);
+INSERT INTO postal.mailbox
+(owner, message_id, envelope_id, folder, unread)
+VALUES('jdoe@leadict.com', NULL, 7, 'inbox', true);
 
-INSERT INTO labels.system_label
-(owner, message_id, folder, unread)
-VALUES('tsawyer@leadict.com', 3, 'inbox', false);
+INSERT INTO postal.mailbox
+(owner, message_id, envelope_id, folder, unread)
+VALUES('tsawyer@leadict.com', NULL, 8, 'inbox', false);
+
+INSERT INTO postal.mailbox
+(owner, message_id, envelope_id, folder)
+VALUES('izboran@gmail.com', 4, NULL, 'drafts');
 --labels.custom_label-------------------------------------------------------------------------------------------------------------
 INSERT INTO labels.custom_label
 (owner, name)
@@ -105,34 +109,33 @@ INSERT INTO labels.custom_label
 VALUES('izboran@gmail.com', 'Testing');
 
 INSERT INTO labels.has
-(owner, message_id, custom_label_id)
-VALUES('jdoe@leadict.com', 3, 1);
+(owner, mailbox_id, custom_label_id)
+VALUES('jdoe@leadict.com', 4, 1);
 INSERT INTO labels.has
-(owner, message_id, custom_label_id)
-VALUES('jdoe@leadict.com', 3, 2);
-INSERT INTO labels.has
-(owner, message_id, custom_label_id)
+(owner, mailbox_id, custom_label_id)
 VALUES('jdoe@leadict.com', 4, 2);
 INSERT INTO labels.has
-(owner, message_id, custom_label_id)
-VALUES('izboran@gmail.com', 1, 3);
+(owner, mailbox_id, custom_label_id)
+VALUES('izboran@gmail.com', 6, 4);
 INSERT INTO labels.has
-(owner, message_id, custom_label_id)
-VALUES('izboran@gmail.com', 1, 4);
-
+(owner, mailbox_id, custom_label_id)
+VALUES('izboran@gmail.com', 2, 3);
+INSERT INTO labels.has
+(owner, mailbox_id, custom_label_id)
+VALUES('izboran@gmail.com', 2, 4);
 --mail.attachment-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.attachment
-(message_id, destination, name, filename, mimetype, encoding, size)
-VALUES(1, './attachments/', '70d2d183-49da-4400-8318-de0275167a80', 'Hello World.txt', 'text/plain', '7bit', 14);
+(message_id, uuaid, filename, destination, mimetype, encoding, size)
+VALUES(1, '70d2d183-49da-4400-8318-de0275167a80', 'Hello World.txt', './attachments/', 'text/plain', '7bit', 14);
 INSERT INTO mail.attachment
-(message_id, destination, name, filename, mimetype, encoding, size)
-VALUES(3, './attachments/', '7e4763e8-098b-4fdd-9f1d-565366fd1fc3', 'Hello World.txt', 'text/plain', '7bit', 14);
+(message_id, uuaid, filename, destination, mimetype, encoding, size)
+VALUES(3, '7e4763e8-098b-4fdd-9f1d-565366fd1fc3', 'Hello World.txt', './attachments/', 'text/plain', '7bit', 14);
 INSERT INTO mail.attachment
-(message_id, destination, name, filename, mimetype, encoding, size)
-VALUES(3, './attachments/', '114c0607-4bb4-4aca-ae8c-49ac558ac317', 'Java 8 Pocket Guide.pdf', 'application/pdf', '7bit', 8384695);
+(message_id, uuaid, filename, destination, mimetype, encoding, size)
+VALUES(3, '114c0607-4bb4-4aca-ae8c-49ac558ac317', 'Java 8 Pocket Guide.pdf', './attachments/', 'application/pdf', '7bit', 8384695);
 INSERT INTO mail.attachment
-(message_id, destination, name, filename, mimetype, encoding, size)
-VALUES(4, './attachments/', '74aa8f05-f2a2-4da4-981d-e9728f7a4fcc', 'Hello World.txt', 'text/plain', '7bit', 14);
+(message_id, uuaid, filename, destination, mimetype, encoding, size)
+VALUES(4, '74aa8f05-f2a2-4da4-981d-e9728f7a4fcc', 'Hello World.txt', './attachments/', 'text/plain', '7bit', 14);
 --mail.tag-------------------------------------------------------------------------------------------------------------
 --'STRING': 0, 'NUMBER': 1, 'BOOLEAN': 2, 'DATE': 3, 'TIME': 4, 'DATETIME': 5
 INSERT INTO mail.tag

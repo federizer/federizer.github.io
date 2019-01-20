@@ -21,8 +21,17 @@ CREATE TABLE tags.tag_value (
     updated_at timestamp(6) with time zone
 );
 
+-- comment out if tags are private
+/*
+ALTER TABLE ONLY tags.tag
+    ADD CONSTRAINT tag_id_owner_unique UNIQUE (id, owner);
+
 ALTER TABLE ONLY tags.tag_value
-    ADD CONSTRAINT value_tag_fkey FOREIGN KEY (tag_id) REFERENCES tags.tag(id);
+    ADD CONSTRAINT value_tag_id_owner_tag_fkey FOREIGN KEY (tag_id, owner) REFERENCES tags.tag(id, owner);*/
+
+-- comment if tags are private
+ALTER TABLE ONLY tags.tag_value
+    ADD CONSTRAINT value_tag_id_tag_fkey FOREIGN KEY (tag_id) REFERENCES tags.tag(id);
 
 CREATE FUNCTION tags.tag_table_updated() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
