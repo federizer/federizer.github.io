@@ -9,11 +9,11 @@ BEGIN
 	END IF;
 
 	RETURN QUERY
-		SELECT h.message_id,
+		SELECT _message_id, --h.message_id
 		jsonb_agg(jsonb_build_object('id', a.id, 'filename', a.filename, 'destination', ac.destination, 'mimetype', a.mimetype, 'encoding', a."encoding", 'size', ac."size") ORDER BY a.id) AS attachments
 			FROM email.attachment a
 			RIGHT JOIN LATERAL (
-				SELECT 	c.uuacid,
+				SELECT 	c.uuacid AS message_id,
 						c.destination,
 						c.size,
 						c.version_major,
@@ -439,7 +439,7 @@ BEGIN
 		IF _attachments IS NOT NULL AND jsonb_typeof(_attachments) = 'array' AND jsonb_array_length(_attachments) > 0 THEN
 		
 			FOR _rec IN SELECT
-				 elm->'id' AS id
+				 elm->>'id' AS id
 				FROM jsonb_array_elements(_attachments) elm
 			LOOP
 				IF REGEXP_REPLACE(COALESCE(_rec.id::text, '0'), '[^0-9]*' ,'0')::int8 > 0 THEN

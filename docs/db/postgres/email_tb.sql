@@ -252,7 +252,7 @@ ALTER TABLE ONLY email.attachment
 
 ALTER TABLE ONLY email.attachment_content
     ADD CONSTRAINT attachment_content_id_attachment_id_unique UNIQUE (id, attachment_id),
-    ADD CONSTRAINT attachment_content_versions_unique UNIQUE (version_major, version_minor);
+    ADD CONSTRAINT attachment_content_versions_unique UNIQUE (attachment_id, version_major, version_minor);
 
 ALTER TABLE ONLY email.has
     ADD CONSTRAINT has_message_attachment_unique UNIQUE (owner, message_id, attachment_id);    
