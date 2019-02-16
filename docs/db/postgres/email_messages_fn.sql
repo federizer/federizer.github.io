@@ -42,7 +42,7 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
-CREATE OR REPLACE FUNCTION email.attachment_latest_content_id_from_repository_newly_uploaded_excluded(IN _owner character varying, IN _message_id int8, IN _attachment_id int8)
+CREATE OR REPLACE FUNCTION email.attachment_latest_content_id_from_repository_newly_uploaded_exc(IN _owner character varying, IN _message_id int8, IN _attachment_id int8) --long name!!!
   RETURNS int8 AS
 $BODY$
 DECLARE
@@ -57,59 +57,22 @@ BEGIN
 		FROM email.attachment_content c
 		RIGHT JOIN email.has h
 		ON h.attachment_content_id = c.id AND h.attachment_id = c.attachment_id
-		WHERE c.attachment_id = _attachment_id AND h.message_id = _message_id AND h.message_id IN (
+		WHERE c.attachment_id = _attachment_id AND EXISTS (
 			SELECT u.id AS id
 			FROM (
 				SELECT
 					m.id AS id							
 				FROM email.message m
-				WHERE (m.id = _message_id) AND (m.sender_email_address = _owner) AND NOT m.deleted_at_sender
+				WHERE (m.sender_email_address = _owner) AND NOT m.deleted_at_sender
 				UNION
 				SELECT
 					e.message_id AS id				
 				FROM email.envelope e			
-				WHERE (e.message_id = _message_id) AND (e.recipient_email_address = _owner) AND NOT e.deleted_at_recipient AND e.received_at IS NOT NULL
+				WHERE (e.recipient_email_address = _owner) AND NOT e.deleted_at_recipient AND e.received_at IS NOT NULL
 				) u
 		)
 		ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
-		LIMIT 1 INTO _attachment_content_id;
-
-	RETURN _attachment_content_id;
-END;			
-$BODY$
-LANGUAGE plpgsql VOLATILE;
-
-CREATE OR REPLACE FUNCTION email.attachment_latest_content_id_from_repository_newly_uploaded_excluded(IN _owner character varying, IN _message_id int8, IN _attachment_id int8)
-  RETURNS int8 AS
-$BODY$
-DECLARE
-	_attachment_content_id int8;
-BEGIN
-	-- _owner is required
-	IF coalesce(TRIM(_owner), '') = '' THEN
-		RAISE EXCEPTION '_owner is required.';
-	END IF;
-
-	SELECT 	c.id
-		FROM email.attachment_content c
-		RIGHT JOIN email.has h
-		ON h.attachment_content_id = c.id AND h.attachment_id = c.attachment_id
-		WHERE c.attachment_id = _attachment_id AND h.message_id = _message_id AND h.message_id IN (
-			SELECT u.id AS id
-			FROM (
-				SELECT
-					m.id AS id							
-				FROM email.message m
-				WHERE (m.id = _message_id) AND (m.sender_email_address = _owner) AND NOT m.deleted_at_sender
-				UNION
-				SELECT
-					e.message_id AS id				
-				FROM email.envelope e			
-				WHERE (e.message_id = _message_id) AND (e.recipient_email_address = _owner) AND NOT e.deleted_at_recipient AND e.received_at IS NOT NULL
-				) u
-		)
-		ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
-		LIMIT 1 INTO _attachment_content_id;
+		LIMIT 1 INTO _attachment_content_id;	
 
 	RETURN _attachment_content_id;
 END;			
@@ -537,13 +500,15 @@ BEGIN
 				SELECT count(*)
 				FROM email.has h
 				WHERE h.attachment_id = _rec.id AND h.message_id = _ret_id INTO _found_cnt;
+			
+				RAISE NOTICE '_found_cnt: % % %', _rec.id, _ret_id, _found_cnt;
 
 				IF COALESCE(_found_cnt, 0) = 0 THEN
 					INSERT INTO email.has (owner, message_id, attachment_id, attachment_content_id)
 						SELECT  _owner,
 								_ret_id,
 								id,
-								email.attachment_latest_content_id_from_repository_newly_uploaded_excluded(_owner, _ret_id, id)
+								email.attachment_latest_content_id_from_repository_newly_uploaded_exc(_owner, _ret_id, id)
 						FROM unnest(_attachment_in_repository_newly_uploaded_excluded_arr) id;			
 				END IF;
 			END LOOP;
