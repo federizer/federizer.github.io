@@ -1,13 +1,7 @@
-/*DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-   
-CREATE EXTENSION "pgcrypto" WITH SCHEMA public;*/
-
 DROP SCHEMA email CASCADE;
 CREATE SCHEMA email;
 
 CREATE TYPE email.actions AS ENUM ('send', 'reply', 'forward');   
-
 
 CREATE SEQUENCE email.email_id_seq
     START WITH 1
@@ -46,7 +40,7 @@ CREATE TABLE email.message (
 DROP SCHEMA postal CASCADE;
 CREATE SCHEMA postal;
 
-CREATE TYPE postal.mailbox_folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');   
+CREATE TYPE postal.mailbox_folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');
 CREATE TYPE postal.mailbox_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'unread', 'trash');
 
 CREATE TABLE postal.mailbox (
@@ -86,34 +80,9 @@ CREATE TABLE email.envelope (
 CREATE TABLE email.attachment (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
-    uuaid uuid NOT NULL DEFAULT public.gen_random_uuid(), 	-- universally unique attachment identifier
-    filename character varying(255) NOT NULL,
-    mimetype character varying(255) NOT NULL,
-    encoding character varying(255) NOT NULL,
-    search_filename tsvector,
-    created_at timestamp(6) with time zone DEFAULT now()
-);
-
-CREATE TABLE email.attachment_content (
-    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
-    owner character varying(255) NOT NULL,
-    uuacid uuid NOT NULL, 									-- universally unique attachment content identifier
-    attachment_id bigint NOT NULL,
-    version_major int4 NOT NULL DEFAULT 1,
-    version_minor int4 NOT NULL DEFAULT 1,
-    destination character varying(4096) NOT NULL,
-    size bigint NOT NULL,
-    content text,
-    search_content tsvector,
-    created_at timestamp(6) with time zone DEFAULT now()
-);
-
-CREATE TABLE email.has (
-    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
-    owner character varying(255) NOT NULL,
     message_id bigint NOT NULL,
-    attachment_id bigint NOT NULL,
-    attachment_content_id bigint NOT NULL
+    file_id bigint NOT NULL,
+    file_content_id bigint NOT NULL
 );
 
 CREATE TABLE email.tag (
@@ -161,26 +130,6 @@ CREATE FUNCTION email.message_table_updated() RETURNS trigger
 	
 	    RETURN NEW; 
 	
-	END; $$;
-
-CREATE FUNCTION email.attachment_table_inserted() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-	BEGIN				
-		NEW.search_filename = to_tsvector(NEW.filename);
-	
-		RETURN NEW;	
-	END; $$;
-
-CREATE FUNCTION email.attachment_content_table_inserted() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    AS $$
-	DECLARE
-	search_content text;
-	BEGIN				
-		NEW.search_content = to_tsvector(search_content);
-	
-		RETURN NEW;	
 	END; $$;
 
 CREATE FUNCTION email.tag_table_inserted() RETURNS trigger
@@ -246,16 +195,9 @@ ALTER TABLE ONLY email.message
    
 ALTER TABLE ONLY email.message
     ADD CONSTRAINT message_id_sender_unique UNIQUE (id, sender_email_address);
-   
+
 ALTER TABLE ONLY email.attachment
-    ADD CONSTRAINT attachment_id_owner_unique UNIQUE (id, owner);
-
-ALTER TABLE ONLY email.attachment_content
-    ADD CONSTRAINT attachment_content_id_attachment_id_unique UNIQUE (id, attachment_id),
-    ADD CONSTRAINT attachment_content_versions_unique UNIQUE (attachment_id, version_major, version_minor);
-
-ALTER TABLE ONLY email.has
-    ADD CONSTRAINT has_message_attachment_unique UNIQUE (owner, message_id, attachment_id);    
+    ADD CONSTRAINT attachment_message_file_unique UNIQUE (owner, message_id, file_id);    
 
 ALTER TABLE ONLY postal.mailbox
     ADD CONSTRAINT mailbox_id_owner_unique UNIQUE (id, owner);
@@ -283,13 +225,10 @@ ALTER TABLE ONLY postal.mailbox
 ALTER TABLE ONLY email.envelope
     ADD CONSTRAINT envelope_message_fkey FOREIGN KEY (message_id) REFERENCES email.message(id) ON DELETE CASCADE;   
 
-ALTER TABLE ONLY email.attachment_content
-    ADD CONSTRAINT attachment_content_attachment_id_attachment_fkey FOREIGN KEY (attachment_id) REFERENCES email.attachment(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY email.has
-    ADD CONSTRAINT has_message_id_owner_fkey FOREIGN KEY (message_id, owner) REFERENCES email.message(id, sender_email_address) ON DELETE CASCADE,
-    ADD CONSTRAINT has_attachment_id_owner_fkey FOREIGN KEY (attachment_id, owner) REFERENCES email.attachment(id, owner), --ON DELETE CASCADE
-    ADD CONSTRAINT has_attachment_content_id_fkey FOREIGN KEY (attachment_content_id, attachment_id) REFERENCES email.attachment_content(id, attachment_id); --ON DELETE CASCADE
+ALTER TABLE ONLY email.attachment
+    ADD CONSTRAINT attachment_message_id_owner_fkey FOREIGN KEY (message_id, owner) REFERENCES email.message(id, sender_email_address) ON DELETE CASCADE,
+    ADD CONSTRAINT attachment_file_id_owner_fkey FOREIGN KEY (file_id, owner) REFERENCES repository.file(id, owner), --ON DELETE CASCADE
+    ADD CONSTRAINT attachment_file_content_id_fkey FOREIGN KEY (file_content_id, file_id) REFERENCES repository.file_content(id, file_id); --ON DELETE CASCADE
 
 ALTER TABLE ONLY email.tag
     ADD CONSTRAINT tag_message_fkey FOREIGN KEY (message_id) REFERENCES email.message(id) ON DELETE CASCADE;
@@ -297,8 +236,6 @@ ALTER TABLE ONLY email.tag
 CREATE INDEX idx_search_message_from ON email.message USING gin (search_from);
 CREATE INDEX idx_search_message_subject ON email.message USING gin (search_subject);
 CREATE INDEX idx_search_message_body ON email.message USING gin (search_body);
-CREATE INDEX idx_search_attachment_filename ON email.attachment USING gin (search_filename);
-CREATE INDEX idx_search_attachment_content ON email.attachment_content USING gin (search_content);
 CREATE INDEX idx_search_tag_name ON email.tag USING gin (search_name);
 CREATE INDEX idx_search_tag_value ON email.tag USING gin (search_value);
 CREATE INDEX idx_search_envelope_to ON email.envelope USING gin (search_to);
@@ -307,12 +244,8 @@ CREATE INDEX idx_search_envelope_bcc ON email.envelope USING gin (search_bcc);
 
 CREATE TRIGGER email_message_inserted BEFORE INSERT ON email.message FOR EACH ROW EXECUTE PROCEDURE email.message_table_inserted();
 CREATE TRIGGER email_message_updated BEFORE UPDATE ON email.message FOR EACH ROW EXECUTE PROCEDURE email.message_table_updated();
-CREATE TRIGGER email_attachment_inserted BEFORE INSERT ON email.attachment FOR EACH ROW EXECUTE PROCEDURE email.attachment_table_inserted();
-CREATE TRIGGER email_attachment_content_inserted BEFORE INSERT ON email.attachment_content FOR EACH ROW EXECUTE PROCEDURE email.attachment_content_table_inserted();
 CREATE TRIGGER email_tag_inserted BEFORE INSERT ON email.tag FOR EACH ROW EXECUTE PROCEDURE email.tag_table_inserted();
 CREATE TRIGGER email_envelope_inserted BEFORE INSERT ON email.envelope FOR EACH ROW EXECUTE PROCEDURE email.envelope_table_inserted();
 CREATE TRIGGER email_envelope_updated BEFORE UPDATE ON email.envelope FOR EACH ROW EXECUTE PROCEDURE email.envelope_table_updated();
 
-CREATE TRIGGER email_prevent_update BEFORE UPDATE ON email.attachment FOR EACH ROW EXECUTE PROCEDURE email.prevent_update();
-CREATE TRIGGER email_prevent_update BEFORE UPDATE ON email.attachment_content FOR EACH ROW EXECUTE PROCEDURE email.prevent_update();
 CREATE TRIGGER email_prevent_update BEFORE UPDATE ON email.tag FOR EACH ROW EXECUTE PROCEDURE email.prevent_update();

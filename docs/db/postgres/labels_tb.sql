@@ -12,7 +12,6 @@ CREATE TABLE labels.custom_label (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     custom_label_id bigint,
-    filter_id bigint,
     name character varying(255) NOT NULL,
     search_name tsvector,
     created_at timestamp(6) with time zone DEFAULT now(),
@@ -29,7 +28,6 @@ ALTER TABLE ONLY labels.custom_label
     ADD CONSTRAINT custom_label_name_owner_unique UNIQUE (name, owner);
 
 ALTER TABLE ONLY labels.custom_label
-    ADD CONSTRAINT custom_label_filter_id_owner_fkey FOREIGN KEY (filter_id, owner) REFERENCES filters.filter(id, owner),
     ADD CONSTRAINT custom_label_custom_label_fkey FOREIGN KEY (custom_label_id, owner) REFERENCES labels.custom_label(id, owner);
 
 ALTER TABLE ONLY labels.has
