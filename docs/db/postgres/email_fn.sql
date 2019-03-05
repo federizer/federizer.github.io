@@ -859,3 +859,94 @@ LANGUAGE plpgsql VOLATILE;
 
 --SELECT email.delete_message('jdoe@leadict.com', NULL);
 --SELECT email.delete_message('jdoe@leadict.com', 1);
+
+CREATE OR REPLACE FUNCTION email.modify_message_list_labels(IN _owner character VARYING, IN _message_ids int8[], IN _mailbox_labels jsonb, IN _custom_label_ids int8[])
+  RETURNS int8 AS
+$BODY$
+DECLARE
+	_message_id int8;
+	_msg_id int8;
+	_env_id int8;
+	_custom_label_id int8;
+	_mailbox_id int8;
+	_labels_updated boolean;
+	_updated_cnt int8 = 0;
+	_mailbox_labels_cnt int8 := 0;
+	_custom_labels_cnt int8 := 0;
+BEGIN
+	-- _owner is required
+	IF coalesce(TRIM(_owner), '') = '' THEN
+		RAISE EXCEPTION '_owner is required.';
+	END IF;
+
+	FOREACH _message_id IN ARRAY _message_ids
+	LOOP 
+	    _msg_id = NULL;
+	    _env_id = NULL;
+		IF _message_id IS NOT NULL THEN
+			SELECT m.id FROM email.message m
+			WHERE m.id = _message_id INTO _msg_id;
+			IF _msg_id IS NULL THEN
+				SELECT id FROM email.envelope e
+				WHERE e.id = _message_id INTO _env_id;
+			END IF;
+		END IF;
+		IF _msg_id > 0 OR _env_id > 0 THEN
+		    RAISE NOTICE '% %', _msg_id, _env_id;
+		   
+		   	_labels_updated = false;
+	   		WITH affected_rows AS (
+				UPDATE postal.mailbox mb
+					SET done = CASE WHEN (_mailbox_labels->>'done') IS NOT NULL THEN (_mailbox_labels->>'done')::boolean ELSE done END,
+						archived = CASE WHEN (_mailbox_labels->>'archived') IS NOT NULL THEN (_mailbox_labels->>'archived')::boolean ELSE archived END,
+						starred = CASE WHEN (_mailbox_labels->>'starred') IS NOT NULL THEN (_mailbox_labels->>'starred')::boolean ELSE starred END,
+						important = CASE WHEN (_mailbox_labels->>'important') IS NOT NULL THEN (_mailbox_labels->>'important')::boolean ELSE important END,
+						chats = CASE WHEN (_mailbox_labels->>'chats') IS NOT NULL THEN (_mailbox_labels->>'chats')::boolean ELSE chats END,
+						spam = CASE WHEN (_mailbox_labels->>'spam') IS NOT NULL THEN (_mailbox_labels->>'spam')::boolean ELSE spam END,
+						unread = CASE WHEN (_mailbox_labels->>'unread') IS NOT NULL THEN (_mailbox_labels->>'unread')::boolean ELSE unread END,
+						trash = CASE WHEN (_mailbox_labels->>'trash') IS NOT NULL THEN (_mailbox_labels->>'trash')::boolean ELSE trash END
+					WHERE (mb.message_id = _msg_id OR mb.envelope_id = _env_id) AND mb."owner" = _owner RETURNING 1
+			) SELECT COUNT(*) INTO _mailbox_labels_cnt
+				FROM affected_rows;
+			IF _mailbox_labels_cnt > 0 THEN
+			    RAISE NOTICE '_mailbox_labels_cnt: %', _mailbox_labels_cnt;
+				_labels_updated = true;
+			END IF;
+			
+			_mailbox_id = NULL;
+			SELECT id FROM postal.mailbox mb
+			WHERE (mb.message_id = _msg_id OR mb.envelope_id = _env_id) AND mb."owner" = _owner into _mailbox_id;
+			IF _mailbox_id IS NOT NULL THEN
+				DELETE FROM labels.has h
+				WHERE h.mailbox_id = _mailbox_id AND h.owner = _owner;
+				FOREACH _custom_label_id IN ARRAY _custom_label_ids
+				LOOP
+					WITH affected_rows AS (
+						INSERT INTO labels.has (owner, mailbox_id,	custom_label_id)
+							SELECT
+								_owner,
+								_mailbox_id,
+								cl.id
+							FROM labels.custom_label cl
+							WHERE cl.id = _custom_label_id AND cl."owner" = _owner RETURNING 1			
+					) SELECT COUNT(*) INTO _custom_labels_cnt
+						FROM affected_rows;
+					IF _custom_labels_cnt > 0 THEN
+					    RAISE NOTICE '_custom_labels_cnt: %', _custom_labels_cnt;
+						_labels_updated = true;
+					END IF;
+				END LOOP;
+			END IF;
+			
+			IF _labels_updated THEN
+				_updated_cnt = _updated_cnt + 1;
+			END IF;
+		END IF;
+	END LOOP;
+	RETURN _updated_cnt;
+END;	   
+$BODY$
+LANGUAGE plpgsql VOLATILE;
+
+--SELECT email.modify_message_list_labels('jdoe@leadict.com', '{10, 13, 17, 41, 42, 43, 44}', '{"done": false, "archived": true}'::jsonb, '{1, 2, 3, 4}');
+

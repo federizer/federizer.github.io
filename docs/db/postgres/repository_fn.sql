@@ -137,7 +137,8 @@ BEGIN
 		WITH affected_rows AS (
 			DELETE FROM repository.file f -- cascade
 				WHERE f.id = _id AND owner = _owner RETURNING 1
-		) SELECT COUNT(*) INTO _file_cnt;
+		) SELECT COUNT(*) INTO _file_cnt
+			FROM affected_rows;
 	END IF;
 
 	RETURN _file_cnt;
