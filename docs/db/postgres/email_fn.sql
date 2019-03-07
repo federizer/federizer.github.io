@@ -164,10 +164,10 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
-CREATE OR REPLACE FUNCTION email.read_message(IN _owner character varying, IN _message_id int8, IN _mailbox_folders jsonb, IN _mailbox_labels jsonb, IN _custom_label_labels jsonb, IN _limit int4, IN _timeline_id int8)
+CREATE OR REPLACE FUNCTION email.read_message(IN _owner character varying, IN _message_id int8, IN _postal_folders jsonb, IN _postal_labels jsonb, IN _custom_label_labels jsonb, IN _limit int4, IN _timeline_id int8)
   RETURNS TABLE(id int8,
-                mailbox_folder postal.mailbox_folders,
-                mailbox_labels jsonb,
+                postal_folder postal.postal_folders,
+                postal_labels jsonb,
                 custom_labels jsonb,
   				--uumid uuid,
   				--uupmid uuid,
@@ -188,8 +188,8 @@ CREATE OR REPLACE FUNCTION email.read_message(IN _owner character varying, IN _m
 $BODY$
 DECLARE
 	_id int8;
-	_mailbox_folders_arr postal.mailbox_folders[4];
-	_mailbox_labels_arr postal.mailbox_labels[8];
+	_postal_folders_arr postal.postal_folders[4];
+	_postal_labels_arr postal.postal_labels[8];
 	_custom_label_labels_arr text[];
 BEGIN
 	-- _owner is required
@@ -207,18 +207,18 @@ BEGIN
 			END IF;
 		END IF;
 	END IF;
-	-- check mailbox.folders type
-	_mailbox_folders_arr = ARRAY(SELECT jsonb_array_elements_text(_mailbox_folders))::text[4];
-	-- check mailbox.labels type
-	_mailbox_labels_arr = ARRAY(SELECT jsonb_array_elements_text(_mailbox_labels))::text[8];
+	-- check mailbox.postal_folders type
+	_postal_folders_arr = ARRAY(SELECT jsonb_array_elements_text(_postal_folders))::text[4];
+	-- check mailbox.postal_labels type
+	_postal_labels_arr = ARRAY(SELECT jsonb_array_elements_text(_postal_labels))::text[8];
 	-- check custom_label.labels
 	_custom_label_labels_arr = ARRAY(SELECT jsonb_array_elements_text(_custom_label_labels))::text[];
 	RETURN QUERY
 SELECT 
 	COALESCE(u.eid, u.id) AS id,
 	--u.owner,
-	u.mailbox_folder,
-	COALESCE(u.mailbox_labels, '[]'::jsonb),
+	u.postal_folder,
+	COALESCE(u.postal_labels, '[]'::jsonb),
 	COALESCE(u.custom_labels, '[]'::jsonb),
 	--mvw.uumid,
 	--mvw.uupmid,
@@ -243,8 +243,8 @@ FROM (
 			NULL AS eid,
 			m.sender_timeline_id AS timeline_id,
 			m.sender_email_address AS owner,
-			mbvw.folder AS mailbox_folder,
-			mbvw.labels AS mailbox_labels,
+			mbvw.folder AS postal_folder,
+			mbvw.labels AS postal_labels,
 			clvw.labels AS custom_labels,
 			NULL AS snoozed_at,
 			NULL AS received_at
@@ -260,8 +260,8 @@ FROM (
 			e.id AS eid,
 			e.recipient_timeline_id AS timeline_id,
 			e.recipient_email_address AS owner,
-			mbvw.folder AS mailbox_folder,
-			mbvw.labels AS mailbox_labels,
+			mbvw.folder AS postal_folder,
+			mbvw.labels AS postal_labels,
 			clvw.labels AS custom_labels,
 			e.snoozed_at AS snoozed_at,
 			e.received_at AS received_at
@@ -282,8 +282,8 @@ FROM (
   	ON afn.message_id = u.id
 	LEFT JOIN email.tag_vw tvw
   	ON tvw.message_id = u.id
- 	WHERE (_mailbox_folders IS NULL OR u.mailbox_folder = ANY (_mailbox_folders_arr) OR (u.mailbox_folder IS NULL AND jsonb_array_length(_mailbox_folders) = 0)) AND
-		  (_mailbox_labels IS NULL OR (_mailbox_labels ?| (ARRAY(select * from jsonb_array_elements_text(u.mailbox_labels))) OR (_mailbox_labels = COALESCE(u.mailbox_labels, '[]'::jsonb)))) AND
+ 	WHERE (_postal_folders IS NULL OR u.postal_folder = ANY (_postal_folders_arr) OR (u.postal_folder IS NULL AND jsonb_array_length(_postal_folders) = 0)) AND
+		  (_postal_labels IS NULL OR (_postal_labels ?| (ARRAY(select * from jsonb_array_elements_text(u.postal_labels))) OR (_postal_labels = COALESCE(u.postal_labels, '[]'::jsonb)))) AND
 		  (_custom_label_labels IS NULL OR (_custom_label_labels ?| (ARRAY(select * from jsonb_array_elements_text(u.custom_labels))) OR (_custom_label_labels = COALESCE(u.custom_labels, '[]'::jsonb))))
  	ORDER BY u.timeline_id DESC
 	LIMIT _limit;
@@ -295,8 +295,8 @@ LANGUAGE plpgsql VOLATILE;
 SELECT * from email.read_message(
 	'jdoe@leadict.com',			-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	1,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
-	NULL,							-- put the _mailbox_folders parameter value instead of '_mailbox_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
-	NULL,							-- put the _mailbox_labels parameter value instead of '_mailbox_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
+	NULL,							-- put the _postal_folders parameter value instead of '_postal_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
+	NULL,							-- put the _postal_labels parameter value instead of '_postal_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
 	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
 	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 20 --
 	NULL							-- put the _timeline_id parameter value instead of '_timeline_id' (int8) NULL, 123 --
@@ -304,8 +304,8 @@ SELECT * from email.read_message(
 SELECT * from email.read_message(
 	'izboran@gmail.com',			-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	NULL,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
-	NULL,							-- put the _mailbox_folders parameter value instead of '_mailbox_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
-	NULL,							-- put the _mailbox_labels parameter value instead of '_mailbox_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
+	NULL,							-- put the _postal_folders parameter value instead of '_postal_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
+	NULL,							-- put the _postal_labels parameter value instead of '_postal_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
 	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
 	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 20 --
 	NULL							-- put the _timeline_id parameter value instead of '_timeline_id' (int8) NULL, 123 --
@@ -643,7 +643,7 @@ BEGIN
 				SELECT
 					to_recipient.recipient_email_address,
 					to_recipient.id,
-					'inbox'::postal.mailbox_folders
+					'inbox'::postal.postal_folders
 				FROM email.envelope to_recipient
 				WHERE to_recipient.message_id = _ret_id AND to_recipient.type = 'to'::email.envelope_type;
 		END IF;
@@ -664,7 +664,7 @@ BEGIN
 				SELECT
 					cc_recipient.recipient_email_address,
 					cc_recipient.id,
-					'inbox'::postal.mailbox_folders
+					'inbox'::postal.postal_folders
 				FROM email.envelope cc_recipient
 				WHERE cc_recipient.message_id = _ret_id AND cc_recipient.type = 'cc'::email.envelope_type;
 		END IF;
@@ -685,7 +685,7 @@ BEGIN
 				SELECT
 					bcc_recipient.recipient_email_address,
 					bcc_recipient.id,
-					'inbox'::postal.mailbox_folders
+					'inbox'::postal.postal_folders
 				FROM email.envelope bcc_recipient
 				WHERE bcc_recipient.message_id = _ret_id AND bcc_recipient.type = 'bcc'::email.envelope_type;
 		END IF;
@@ -710,16 +710,16 @@ BEGIN
 		IF _send = true THEN
 			IF _id IS NULL THEN
 				INSERT INTO postal.mailbox (owner,	message_id,	folder)
-					VALUES(_owner, _ret_id,	'sent'::postal.mailbox_folders);
+					VALUES(_owner, _ret_id,	'sent'::postal.postal_folders);
 			ELSE
 				UPDATE postal.mailbox
-					SET folder = 'sent'::postal.mailbox_folders
+					SET folder = 'sent'::postal.postal_folders
 					WHERE message_id = _ret_id AND owner = _owner;			
 			END IF;
 		ELSE
 			IF _id IS NULL THEN
 				INSERT INTO postal.mailbox (owner,	message_id,	folder)
-					VALUES(_owner, _ret_id,	'drafts'::postal.mailbox_folders);
+					VALUES(_owner, _ret_id,	'drafts'::postal.postal_folders);
 			END IF;
 		END IF;
 --postal.mailbox-sender-end--------------------			
@@ -762,8 +762,8 @@ LANGUAGE plpgsql VOLATILE;
 SELECT * from email.read_message(
 	'izboran@gmail.com',			-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	NULL,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
-	NULL,							-- put the _mailbox_folders parameter value instead of '_mailbox_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
-	NULL,							-- put the _mailbox_labels parameter value instead of '_mailbox_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
+	NULL,							-- put the _postal_folders parameter value instead of '_postal_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
+	NULL,							-- put the _postal_labels parameter value instead of '_postal_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
 	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
 	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 20 --
 	NULL							-- put the _timeline_id parameter value instead of '_timeline_id' (int8) NULL, 123 --
@@ -860,7 +860,7 @@ LANGUAGE plpgsql VOLATILE;
 --SELECT email.delete_message('jdoe@leadict.com', NULL);
 --SELECT email.delete_message('jdoe@leadict.com', 1);
 
-CREATE OR REPLACE FUNCTION email.modify_message_list_labels(IN _owner character VARYING, IN _message_ids int8[], IN _mailbox_labels jsonb, IN _custom_label_ids int8[])
+CREATE OR REPLACE FUNCTION email.modify_message_list_labels(IN _owner character VARYING, IN _message_ids int8[], IN _postal_labels jsonb, IN _custom_label_ids int8[])
   RETURNS int8 AS
 $BODY$
 DECLARE
@@ -871,7 +871,7 @@ DECLARE
 	_mailbox_id int8;
 	_labels_updated boolean;
 	_updated_cnt int8 = 0;
-	_mailbox_labels_cnt int8 := 0;
+	_postal_labels_cnt int8 := 0;
 	_custom_labels_cnt int8 := 0;
 BEGIN
 	-- _owner is required
@@ -897,19 +897,19 @@ BEGIN
 		   	_labels_updated = false;
 	   		WITH affected_rows AS (
 				UPDATE postal.mailbox mb
-					SET done = CASE WHEN (_mailbox_labels->>'done') IS NOT NULL THEN (_mailbox_labels->>'done')::boolean ELSE done END,
-						archived = CASE WHEN (_mailbox_labels->>'archived') IS NOT NULL THEN (_mailbox_labels->>'archived')::boolean ELSE archived END,
-						starred = CASE WHEN (_mailbox_labels->>'starred') IS NOT NULL THEN (_mailbox_labels->>'starred')::boolean ELSE starred END,
-						important = CASE WHEN (_mailbox_labels->>'important') IS NOT NULL THEN (_mailbox_labels->>'important')::boolean ELSE important END,
-						chats = CASE WHEN (_mailbox_labels->>'chats') IS NOT NULL THEN (_mailbox_labels->>'chats')::boolean ELSE chats END,
-						spam = CASE WHEN (_mailbox_labels->>'spam') IS NOT NULL THEN (_mailbox_labels->>'spam')::boolean ELSE spam END,
-						unread = CASE WHEN (_mailbox_labels->>'unread') IS NOT NULL THEN (_mailbox_labels->>'unread')::boolean ELSE unread END,
-						trash = CASE WHEN (_mailbox_labels->>'trash') IS NOT NULL THEN (_mailbox_labels->>'trash')::boolean ELSE trash END
+					SET done = CASE WHEN (_postal_labels->>'done') IS NOT NULL THEN (_postal_labels->>'done')::boolean ELSE done END,
+						archived = CASE WHEN (_postal_labels->>'archived') IS NOT NULL THEN (_postal_labels->>'archived')::boolean ELSE archived END,
+						starred = CASE WHEN (_postal_labels->>'starred') IS NOT NULL THEN (_postal_labels->>'starred')::boolean ELSE starred END,
+						important = CASE WHEN (_postal_labels->>'important') IS NOT NULL THEN (_postal_labels->>'important')::boolean ELSE important END,
+						chats = CASE WHEN (_postal_labels->>'chats') IS NOT NULL THEN (_postal_labels->>'chats')::boolean ELSE chats END,
+						spam = CASE WHEN (_postal_labels->>'spam') IS NOT NULL THEN (_postal_labels->>'spam')::boolean ELSE spam END,
+						unread = CASE WHEN (_postal_labels->>'unread') IS NOT NULL THEN (_postal_labels->>'unread')::boolean ELSE unread END,
+						trash = CASE WHEN (_postal_labels->>'trash') IS NOT NULL THEN (_postal_labels->>'trash')::boolean ELSE trash END
 					WHERE (mb.message_id = _msg_id OR mb.envelope_id = _env_id) AND mb."owner" = _owner RETURNING 1
-			) SELECT COUNT(*) INTO _mailbox_labels_cnt
+			) SELECT COUNT(*) INTO _postal_labels_cnt
 				FROM affected_rows;
-			IF _mailbox_labels_cnt > 0 THEN
-			    RAISE NOTICE '_mailbox_labels_cnt: %', _mailbox_labels_cnt;
+			IF _postal_labels_cnt > 0 THEN
+			    --RAISE NOTICE '_postal_labels_cnt: %', _postal_labels_cnt;
 				_labels_updated = true;
 			END IF;
 			

@@ -40,15 +40,15 @@ CREATE TABLE email.message (
 DROP SCHEMA postal CASCADE;
 CREATE SCHEMA postal;
 
-CREATE TYPE postal.mailbox_folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');
-CREATE TYPE postal.mailbox_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'unread', 'trash');
+CREATE TYPE postal.postal_folders AS ENUM ('inbox', 'snoozed', 'sent', 'drafts');
+CREATE TYPE postal.postal_labels AS ENUM ('done', 'archived', 'starred', 'important', 'chats', 'spam', 'unread', 'trash');
 
 CREATE TABLE postal.mailbox (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     message_id bigint,
     envelope_id bigint,
-    folder postal.mailbox_folders NOT NULL DEFAULT 'inbox',
+    folder postal.postal_folders NOT NULL DEFAULT 'inbox',
     done bool NOT NULL DEFAULT false,
     archived bool NOT NULL DEFAULT false,
     starred bool NOT NULL DEFAULT false,
@@ -218,9 +218,9 @@ ALTER TABLE ONLY email.envelope
 ALTER TABLE ONLY postal.mailbox
     ADD CONSTRAINT mailbox_message_id_message_fkey FOREIGN KEY (message_id, owner) REFERENCES email.message(id, sender_email_address) ON DELETE CASCADE,
     ADD CONSTRAINT mailbox_envelope_id_envelope_fkey FOREIGN KEY (envelope_id, owner) REFERENCES email.envelope(id, recipient_email_address) ON DELETE CASCADE,
-	ADD CONSTRAINT message_id_xor_envelope_id CHECK ((message_id IS NULL) != (envelope_id IS NULL)),
-	ADD CONSTRAINT mailbox_valid_folders CHECK ((message_id IS NOT NULL AND folder IN ('sent'::postal.mailbox_folders, 'drafts'::postal.mailbox_folders)) OR
-													(envelope_id IS NOT NULL AND folder IN ('inbox'::postal.mailbox_folders, 'snoozed'::postal.mailbox_folders)));
+	ADD CONSTRAINT mailbox_message_id_xor_envelope_id CHECK ((message_id IS NULL) != (envelope_id IS NULL)),
+	ADD CONSTRAINT mailbox_valid_postal_folders CHECK ((message_id IS NOT NULL AND folder IN ('sent'::postal.postal_folders, 'drafts'::postal.postal_folders)) OR
+													(envelope_id IS NOT NULL AND folder IN ('inbox'::postal.postal_folders, 'snoozed'::postal.postal_folders)));
 
 ALTER TABLE ONLY email.envelope
     ADD CONSTRAINT envelope_message_fkey FOREIGN KEY (message_id) REFERENCES email.message(id) ON DELETE CASCADE;   

@@ -83,3 +83,14 @@ SELECT h.mailbox_id,
    LEFT JOIN labels.custom_label cl
    ON h.owner = cl.owner AND h.custom_label_id = cl.id
    GROUP BY h.mailbox_id, h.owner;
+
+CREATE OR REPLACE VIEW contacts.people_groups_vw AS  
+	SELECT g.id, b.owner, b.person_id, g.name FROM contacts.belongs b
+	LEFT JOIN contacts.group g ON
+	b.group_id = g.id AND b."owner" = g."owner";
+
+CREATE OR REPLACE VIEW contacts.groups_people_vw AS  
+	SELECT p.id, b.owner, b.group_id, p.given_name, p.surname, p.email_address FROM contacts.belongs b
+	LEFT JOIN contacts.person p ON
+	b.person_id = p.id AND b."owner" = p."owner";
+	
