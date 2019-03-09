@@ -10,7 +10,7 @@ CREATE TABLE filters.filter (
     updated_at timestamp(6) with time zone
 );
 
-CREATE TABLE filters.system_label_action (
+CREATE TABLE filters.postal_label_action (
     id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
     owner character varying(255) NOT NULL,
     filter_id bigint NOT NULL,
@@ -47,8 +47,8 @@ ALTER TABLE ONLY filters.filter
 ALTER TABLE ONLY filters.filter
     ADD CONSTRAINT filter_name_owner_unique UNIQUE (name, owner);
 
-ALTER TABLE ONLY filters.system_label_action
-    ADD CONSTRAINT system_label_action_filter_unique UNIQUE (owner, filter_id, done, archived, starred, important, chats, spam, unread, trash); 
+ALTER TABLE ONLY filters.postal_label_action
+    ADD CONSTRAINT postal_label_action_filter_unique UNIQUE (owner, filter_id, done, archived, starred, important, chats, spam, unread, trash); 
    
 ALTER TABLE ONLY filters.custom_label_action
     ADD CONSTRAINT custom_label_action_filter_custom_label_unique UNIQUE (owner, filter_id, custom_label_id); 
@@ -56,8 +56,8 @@ ALTER TABLE ONLY filters.custom_label_action
 ALTER TABLE ONLY filters.forward_action
     ADD CONSTRAINT forward_action_filter_unique UNIQUE (owner, filter_id); 
 
-ALTER TABLE ONLY filters.system_label_action
-    ADD CONSTRAINT system_label_action_filter_id_owner_fkey FOREIGN KEY (filter_id, owner) REFERENCES filters.filter(id, owner) ON DELETE CASCADE;    
+ALTER TABLE ONLY filters.postal_label_action
+    ADD CONSTRAINT postal_label_action_filter_id_owner_fkey FOREIGN KEY (filter_id, owner) REFERENCES filters.filter(id, owner) ON DELETE CASCADE;    
 
 ALTER TABLE ONLY filters.custom_label_action
     ADD CONSTRAINT custom_label_action_filter_id_owner_fkey FOREIGN KEY (filter_id, owner) REFERENCES filters.filter(id, owner) ON DELETE CASCADE,
