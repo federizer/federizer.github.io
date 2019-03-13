@@ -9,6 +9,8 @@ SELECT m.id,
 		m.body,
 		m.sender_timeline_id,
 		m.sent_at,
+    	m.search_subject,
+    	m.search_body,
 		m.created_at,
 		m.updated_at
 	FROM email.message m;
@@ -70,7 +72,7 @@ SELECT mb.id,
      || mb.chats::int::bit
      || mb.spam::int::bit
      || mb.unread::int::bit
-     || mb.trash::int::bit)::bit(8)::int4 AS label_bits									
+     || mb.trash::int::bit)::bit(8)::int4 AS label_bits --this doesn't work (due to null values)
 
    FROM postal.mailbox mb;
    
@@ -94,3 +96,48 @@ CREATE OR REPLACE VIEW contacts.groups_people_vw AS
 	LEFT JOIN contacts.person p ON
 	b.person_id = p.id AND b."owner" = p."owner";
 	
+CREATE OR REPLACE VIEW filters.filter_vw AS
+SELECT 	f.id,
+		f.owner,
+		f.name,
+		f.criteria,
+		/*to_jsonb(array_remove(ARRAY[CASE WHEN pla.done THEN 'done' END,
+									CASE WHEN pla.archived THEN 'archived' END,
+									CASE WHEN pla.starred THEN 'starred' END,
+									CASE WHEN pla.important THEN 'important' END,
+									CASE WHEN pla.chats THEN 'chats' END,
+									CASE WHEN pla.spam THEN 'spam' END,
+									CASE WHEN pla.unread THEN 'unread' END,
+									CASE WHEN pla.trash THEN 'trash' END], NULL)) AS "postal_label_actions",*/
+		jsonb_build_object(	'done', pla.done,
+							'archived', pla.archived,
+							'starred', pla.starred,
+							'important', pla.important,
+							'chats', pla.chats,
+							'spam', pla.spam,
+							'unread', pla.unread,
+							'trash', pla.trash) AS postal_labels,
+		COALESCE(claa.add_custom_label_ids, '[]'::jsonb) AS add_custom_label_ids,
+		COALESCE(clar.remove_custom_label_ids, '[]'::jsonb) AS remove_custom_label_ids
+   FROM filters.filter f
+   LEFT JOIN filters.postal_label_action pla
+   ON pla.owner = f.owner AND pla.filter_id = f.id
+   LEFT JOIN LATERAL (
+	SELECT 	cla."owner",
+			cla.filter_id,
+			jsonb_build_object('custom_label_ids', jsonb_agg(cla.custom_label_id ORDER BY cla.custom_label_id)) AS add_custom_label_ids
+	FROM filters.custom_label_action cla
+	WHERE cla.custom_label_action = 'add'::filters.custom_label_actions
+	GROUP BY cla."owner", cla.filter_id
+	) claa
+   ON claa.owner = f.owner AND claa.filter_id = f.id
+   LEFT JOIN LATERAL (
+	SELECT 	cla."owner",
+			cla.filter_id,
+			jsonb_build_object('custom_label_ids', jsonb_agg(cla.custom_label_id ORDER BY cla.custom_label_id)) AS remove_custom_label_ids
+	FROM filters.custom_label_action cla
+	WHERE cla.custom_label_action = 'remove'::filters.custom_label_actions
+	GROUP BY cla."owner", cla.filter_id
+	) clar
+   ON clar.owner = f.owner AND clar.filter_id = f.id;
+

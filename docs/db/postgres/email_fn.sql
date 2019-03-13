@@ -164,6 +164,58 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
+CREATE OR REPLACE FUNCTION email.read_message_search_query(IN _owner character varying, IN _message_id int8, IN _postal_folders jsonb, IN _postal_labels jsonb, IN _custom_label_labels jsonb, IN _search_query text, IN _limit int4, IN _timeline_id int8)
+  RETURNS TABLE(id int8,
+                postal_folder postal.postal_folders,
+                postal_labels jsonb,
+                custom_labels jsonb,
+  				--uumid uuid,
+  				--uupmid uuid,
+  				--uumtid uuid,
+  				fwd bool,
+				sender jsonb,
+                subject text,
+                body text,
+                envelopes jsonb,
+                attachments jsonb,
+                tags jsonb,
+				timeline_id int8,
+				snoozed_at timestamptz,
+				received_at timestamptz,
+                sent_at timestamptz,
+			    search_subject tsvector,
+			    search_body tsvector,
+                updated_at timestamptz,
+                created_at timestamptz) AS
+$BODY$
+DECLARE
+	_sql TEXT := 'SELECT * FROM email.read_message($1, $2, $3, $4, $5, $7, $8)';
+	_where TEXT;
+BEGIN
+	IF _search_query IS NOT NULL THEN
+		_where := _search_query;
+	   /*_where := concat_ws(' AND '
+	       , CASE WHEN state               IS NOT NULL THEN 'state = $2'                  END
+	       , CASE WHEN district            IS NOT NULL THEN 'district = $3'               END
+	       , CASE WHEN bloodGroup          IS NOT NULL THEN 'bloodgroup = $4'             END
+	       , CASE WHEN status              IS NOT NULL THEN 'status = $5'                 END
+	       , CASE WHEN approveRejectStatus IS NOT NULL THEN 'approve_reject_status  = $6' END
+	       , CASE r.level
+	            WHEN 'DISTRICT' THEN 'district = $10 AND state = $11 AND fk_id = $12'
+	            WHEN 'UNIT'     THEN 'district = $10 AND state = $11 AND fk_id = $12'
+	            WHEN 'STATE'    THEN 'state = $11 AND fk_id = $12'
+	            WHEN 'NATIONAL' THEN 'fk_id = $12'
+	         END);*/
+	
+		_sql := _sql || ' WHERE ' || _where;
+	END IF;
+
+	RETURN QUERY EXECUTE _sql
+   		USING _owner, _message_id, _postal_folders, _postal_labels, _custom_label_labels, _search_query, _limit, _timeline_id;
+END;	   
+$BODY$
+LANGUAGE plpgsql VOLATILE;
+
 CREATE OR REPLACE FUNCTION email.read_message(IN _owner character varying, IN _message_id int8, IN _postal_folders jsonb, IN _postal_labels jsonb, IN _custom_label_labels jsonb, IN _limit int4, IN _timeline_id int8)
   RETURNS TABLE(id int8,
                 postal_folder postal.postal_folders,
@@ -183,6 +235,8 @@ CREATE OR REPLACE FUNCTION email.read_message(IN _owner character varying, IN _m
 				snoozed_at timestamptz,
 				received_at timestamptz,
                 sent_at timestamptz,
+			    search_subject tsvector,
+			    search_body tsvector,
                 updated_at timestamptz,
                 created_at timestamptz) AS
 $BODY$
@@ -198,10 +252,10 @@ BEGIN
 	END IF;
 	IF _message_id IS NOT NULL THEN
 		SELECT m.id FROM email.message m
-		WHERE m.id = _message_id INTO _id;
+		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
 		IF _id IS NULL THEN
 			SELECT message_id FROM email.envelope e
-			WHERE e.id = _message_id INTO _id;
+			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
 			IF _id IS NULL THEN
 				_id = 0; -- not found
 			END IF;
@@ -218,8 +272,8 @@ SELECT
 	COALESCE(u.eid, u.id) AS id,
 	--u.owner,
 	u.postal_folder,
-	COALESCE(u.postal_labels, '[]'::jsonb),
-	COALESCE(u.custom_labels, '[]'::jsonb),
+	COALESCE(u.postal_labels, '[]'::jsonb) AS postal_labels,
+	COALESCE(u.custom_labels, '[]'::jsonb) AS custom_labels,
 	--mvw.uumid,
 	--mvw.uupmid,
 	--mvw.uumtid,
@@ -229,12 +283,14 @@ SELECT
 	mvw.body,
 	evw.envelopes,
 	--avw.attachments,
-	COALESCE(afn.attachments, '[]'::jsonb),
-	COALESCE(tvw.tags, '[]'::jsonb),
+	COALESCE(afn.attachments, '[]'::jsonb) AS attachments,
+	COALESCE(tvw.tags, '[]'::jsonb) AS tags,
 	u.timeline_id,
 	u.snoozed_at,
 	u.received_at,
 	mvw.sent_at,
+    mvw.search_subject,
+    mvw.search_body,
 	mvw.updated_at,
 	mvw.created_at
 FROM (
@@ -381,10 +437,10 @@ BEGIN
 	END IF;
 	IF _message_id IS NOT NULL THEN
 		SELECT m.id FROM email.message m
-		WHERE m.id = _message_id INTO _id;
+		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
 		IF _id IS NULL THEN
 			SELECT message_id FROM email.envelope e
-			WHERE e.id = _message_id INTO _id;
+			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
 			IF _id IS NULL THEN
 				_id = 0; -- not found
 				--RAISE EXCEPTION '_message_id: % not found', _message_id;
@@ -394,10 +450,10 @@ BEGIN
 	END IF;
 	IF _parent_message_id IS NOT NULL THEN
 		SELECT m.id FROM email.message m
-		WHERE m.id = _parent_message_id INTO _parent_id;
+		WHERE m.id = _parent_message_id AND m.sender_email_address = _owner INTO _parent_id;
 		IF _parent_id IS NULL THEN
 			SELECT message_id FROM email.envelope e
-			WHERE e.id = _parent_message_id INTO _parent_id;
+			WHERE e.id = _parent_message_id AND e.recipient_email_address = _owner INTO _parent_id;
 			IF _parent_id IS NULL THEN
 				_parent_id = 0; -- not found
 				--RAISE EXCEPTION '_parent_message_id: % not found', _parent_message_id;
@@ -788,10 +844,10 @@ BEGIN
 	END IF;
 	IF _message_id IS NOT NULL THEN
 		SELECT m.id FROM email.message m
-		WHERE m.id = _message_id INTO _id;
+		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
 		IF _id IS NULL THEN
 			SELECT message_id FROM email.envelope e
-			WHERE e.id = _message_id INTO _id;
+			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
 			IF _id IS NULL THEN
 				_id = 0; -- not found
 				--RETURN NULL;
@@ -885,10 +941,10 @@ BEGIN
 	    _env_id = NULL;
 		IF _message_id IS NOT NULL THEN
 			SELECT m.id FROM email.message m
-			WHERE m.id = _message_id INTO _msg_id;
+			WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _msg_id;
 			IF _msg_id IS NULL THEN
 				SELECT id FROM email.envelope e
-				WHERE e.id = _message_id INTO _env_id;
+				WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _env_id;
 			END IF;
 		END IF;
 		IF _msg_id > 0 OR _env_id > 0 THEN
