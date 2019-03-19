@@ -41,7 +41,7 @@ BEGIN
 				FROM repository.file_content c
 				LEFT JOIN email.attachment a
 				ON a.file_content_id = c.id AND a.file_id = c.file_id
-				WHERE c.owner = _owner AND c.file_id = f.id AND (_message_id IS NULL OR a.message_id = _message_id) AND a.message_id IN (
+				WHERE c.owner = f.owner AND c.file_id = f.id AND (_message_id IS NULL OR a.message_id = _message_id) AND a.message_id IN (
 						SELECT u.id AS id
 						FROM (
 							SELECT
@@ -58,10 +58,19 @@ BEGIN
 				ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
 				LIMIT 1
 				) fc ON TRUE
-				WHERE f.owner = _owner AND (_attachment_id IS NULL OR f.id = _attachment_id) AND (_message_id IS NULL OR fc.message_id IS NOT NULL) AND fc.uufcid IS NOT NULL;
+				WHERE /*f.owner = _owner AND*/ (_attachment_id IS NULL OR f.id = _attachment_id) AND (_message_id IS NULL OR fc.message_id IS NOT NULL) AND fc.uufcid IS NOT NULL;
 END;			
 $BODY$
 LANGUAGE plpgsql VOLATILE;
+
+/*
+SELECT *
+FROM email.read_attachment(
+	'tsawyer@leadict.com',	-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	1,	-- put the _message_id parameter value instead of '_message_id' (int8) 999
+	NULL	-- put the _attachment_id parameter value instead of '_attachment_id' (int8) 999, NULL
+);
+*/
 
 CREATE OR REPLACE FUNCTION email.read_attachments(IN _owner character varying, IN _message_id int8)
   RETURNS TABLE(message_id int8,
@@ -695,11 +704,12 @@ BEGIN
 				CASE WHEN _send = true THEN now() ELSE NULL END
 			FROM jsonb_array_elements(_message::jsonb#>'{envelopes, to}') to_recipient;
 		IF _send = true THEN
-			INSERT INTO postal.mailbox (owner, envelope_id,	folder)
+			INSERT INTO postal.mailbox (owner, envelope_id,	folder, unread)
 				SELECT
 					to_recipient.recipient_email_address,
 					to_recipient.id,
-					'inbox'::postal.postal_folders
+					'inbox'::postal.postal_folders,
+					true
 				FROM email.envelope to_recipient
 				WHERE to_recipient.message_id = _ret_id AND to_recipient.type = 'to'::email.envelope_type;
 		END IF;
@@ -716,11 +726,12 @@ BEGIN
 				CASE WHEN _send = true THEN now() ELSE NULL END
 			FROM jsonb_array_elements(_message::jsonb#>'{envelopes, cc}') cc_recipient;								 
 		IF _send = true THEN
-			INSERT INTO postal.mailbox (owner, envelope_id,	folder)
+			INSERT INTO postal.mailbox (owner, envelope_id,	folder, unread)
 				SELECT
 					cc_recipient.recipient_email_address,
 					cc_recipient.id,
-					'inbox'::postal.postal_folders
+					'inbox'::postal.postal_folders,
+					true
 				FROM email.envelope cc_recipient
 				WHERE cc_recipient.message_id = _ret_id AND cc_recipient.type = 'cc'::email.envelope_type;
 		END IF;
@@ -737,11 +748,12 @@ BEGIN
 				CASE WHEN _send = true THEN now() ELSE NULL END
 			FROM jsonb_array_elements(_message::jsonb#>'{envelopes, bcc}') bcc_recipient;								 
 		IF _send = true THEN
-			INSERT INTO postal.mailbox (owner, envelope_id,	folder)
+			INSERT INTO postal.mailbox (owner, envelope_id,	folder, unread)
 				SELECT
 					bcc_recipient.recipient_email_address,
 					bcc_recipient.id,
-					'inbox'::postal.postal_folders
+					'inbox'::postal.postal_folders,
+					true
 				FROM email.envelope bcc_recipient
 				WHERE bcc_recipient.message_id = _ret_id AND bcc_recipient.type = 'bcc'::email.envelope_type;
 		END IF;
