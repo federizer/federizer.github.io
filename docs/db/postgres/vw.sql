@@ -26,24 +26,46 @@ FROM (SELECT envelope.message_id,
 GROUP BY e.message_id;
 
 --https://dba.stackexchange.com/questions/51895/efficient-query-to-get-greatest-value-per-group-from-big-table?answertab=votes#tab-top
-/*CREATE OR REPLACE VIEW email.file_vw AS	    
+CREATE OR REPLACE VIEW email.file_vw AS	    
 SELECT a.message_id,
-		jsonb_agg(jsonb_build_object('id', f.id, 'uufid', f.uufid, 'filename', f.filename, 'destination', fc.destination, 'mimetype', f.mimetype, 'encoding', f."encoding", 'size', fc."size") ORDER BY f.id) AS files
+		jsonb_agg(jsonb_build_object('id', f.id, 'uufid', f.uufid, 'uufcid', fc.uufcid, 'filename', f.filename, 'destination', fc.destination, 'mimetype', f.mimetype, 'encoding', f."encoding", 'size', fc."size") ORDER BY f.id) AS files
 FROM repository.file f
 LEFT JOIN email.attachment a
 ON a.file_id = f.id
 LEFT JOIN LATERAL (
-	SELECT 	c.destination,
+	SELECT 	c.uufcid,
+			c.destination,
 			c.size,
 			c.version_major,
 			c.version_minor,
 			c.content
 	FROM repository.file_content c
-	WHERE c.file_id = f.id AND c.id = a.file_content_id
+	WHERE c.file_id = f.id
 	ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
 	LIMIT 1
-	) fc ON true
-GROUP BY a.message_id;*/
+	) fc ON TRUE
+GROUP BY a.message_id;
+		
+CREATE OR REPLACE VIEW email.attachment_vw AS	    
+SELECT a.message_id,
+		jsonb_agg(jsonb_build_object('id', f.id, 'uufid', f.uufid, 'uufcid', fc.uufcid, 'filename', f.filename, 'destination', fc.destination, 'mimetype', f.mimetype, 'encoding', f."encoding", 'size', fc."size") ORDER BY f.id) AS attachments
+FROM repository.file f
+LEFT JOIN email.attachment a
+ON a.file_id = f.id
+LEFT JOIN LATERAL (
+	SELECT 	c.uufcid,
+			c.destination,
+			c.size,
+			c.version_major,
+			c.version_minor,
+			c.content
+	FROM repository.file_content c
+	WHERE c.file_id = f.id
+	ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
+	LIMIT 1
+	) fc ON TRUE
+WHERE a.message_id IS NOT NULL	
+GROUP BY a.message_id;
 		
 CREATE OR REPLACE VIEW email.tag_vw AS	    
 SELECT message_id,

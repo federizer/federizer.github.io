@@ -227,7 +227,8 @@ ALTER TABLE ONLY email.envelope
 
 ALTER TABLE ONLY email.attachment
     ADD CONSTRAINT attachment_message_id_owner_fkey FOREIGN KEY (message_id, owner) REFERENCES email.message(id, sender_email_address) ON DELETE CASCADE,
-    ADD CONSTRAINT attachment_file_id_owner_fkey FOREIGN KEY (file_id, owner) REFERENCES repository.file(id, owner), --ON DELETE CASCADE
+    --ADD CONSTRAINT attachment_file_id_owner_fkey FOREIGN KEY (file_id, owner) REFERENCES repository.file(id, owner), --ON DELETE CASCADE
+    ADD CONSTRAINT attachment_file_id_fkey FOREIGN KEY (file_id) REFERENCES repository.file(id), --ON DELETE CASCADE
     ADD CONSTRAINT attachment_file_content_id_fkey FOREIGN KEY (file_content_id, file_id) REFERENCES repository.file_content(id, file_id); --ON DELETE CASCADE
 
 ALTER TABLE ONLY email.tag

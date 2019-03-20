@@ -9,6 +9,8 @@ CREATE OR REPLACE FUNCTION email.read_attachment(IN _owner character varying, IN
                 encoding character varying,
                 size int8) AS
 $BODY$
+DECLARE
+	_id int8;
 BEGIN
 	-- _owner is required
 	IF coalesce(TRIM(_owner), '') = '' THEN
@@ -20,45 +22,61 @@ BEGIN
 		RAISE EXCEPTION '_message_id is required.';
 	END IF;*/
 
+	IF _message_id IS NOT NULL THEN
+		SELECT m.id FROM email.message m
+		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
+		IF _id IS NULL THEN
+			SELECT e.message_id FROM email.envelope e
+			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
+			IF _id IS NULL THEN
+				_id = 0; -- not found
+			END IF;
+		END IF;
+	END IF;
+
 	RETURN QUERY
 		SELECT  f.id,
 			f.uufid,
 			fc.uufcid,
-			fc.message_id,
+			COALESCE(u.eid, u.id) AS id,
 			f.filename,
 			fc.destination,
 			f.mimetype,
 			f.encoding,
 			fc.size
-			FROM repository.file f
-			LEFT JOIN LATERAL (
-				SELECT 	c.uufcid,
-						a.message_id,
-						c.destination,
-						c.size,
-						c.version_major,
-						c.version_minor
-				FROM repository.file_content c
-				LEFT JOIN email.attachment a
-				ON a.file_content_id = c.id AND a.file_id = c.file_id
-				WHERE c.owner = f.owner AND c.file_id = f.id AND (_message_id IS NULL OR a.message_id = _message_id) AND a.message_id IN (
-						SELECT u.id AS id
-						FROM (
-							SELECT
-								m.id AS id							
-							FROM email.message m
-							WHERE (m.id = a.message_id) AND (m.sender_email_address = _owner) AND NOT m.deleted_at_sender
-							UNION
-							SELECT
-								e.message_id AS id				
-							FROM email.envelope e			
-							WHERE (e.message_id = a.message_id) AND (e.recipient_email_address = _owner) AND NOT e.deleted_at_recipient AND e.received_at IS NOT NULL
-							) u
-					)
-				ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
-				LIMIT 1
-				) fc ON TRUE
-				WHERE /*f.owner = _owner AND*/ (_attachment_id IS NULL OR f.id = _attachment_id) AND (_message_id IS NULL OR fc.message_id IS NOT NULL) AND fc.uufcid IS NOT NULL;
+		FROM repository.file f
+		LEFT JOIN email.attachment a
+		ON a.file_id = f.id
+		LEFT JOIN LATERAL (
+			SELECT 	c.uufcid,
+					c.destination,
+					c.size,
+					c.version_major,
+					c.version_minor,
+					c.content
+			FROM repository.file_content c
+			WHERE c.file_id = f.id
+			ORDER BY c.version_major DESC, c.version_minor DESC NULLS LAST
+			LIMIT 1
+			) fc ON TRUE
+			RIGHT JOIN 
+			(SELECT 
+						m.id AS id,
+						NULL AS eid,
+						m.sender_email_address AS owner
+				FROM email.message m
+				WHERE (_id IS NULL OR m.id = _id) AND (m.sender_email_address = _owner) AND NOT m.deleted_at_sender
+				UNION
+				SELECT 
+						e.message_id AS id,
+						e.id AS eid,
+						e.recipient_email_address AS owner
+				FROM email.envelope e
+				WHERE (_id IS NULL OR e.message_id = _id) AND (e.recipient_email_address = _owner) AND NOT e.deleted_at_recipient AND e.received_at IS NOT NULL
+				) u
+			ON u.id = a.message_id
+			WHERE _attachment_id IS NULL OR f.id = _attachment_id;	
+
 END;			
 $BODY$
 LANGUAGE plpgsql VOLATILE;
@@ -66,35 +84,11 @@ LANGUAGE plpgsql VOLATILE;
 /*
 SELECT *
 FROM email.read_attachment(
-	'tsawyer@leadict.com',	-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
-	1,	-- put the _message_id parameter value instead of '_message_id' (int8) 999
+	'izboran@gmail.com',	-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	NULL,	-- put the _message_id parameter value instead of '_message_id' (int8) 999
 	NULL	-- put the _attachment_id parameter value instead of '_attachment_id' (int8) 999, NULL
 );
 */
-
-CREATE OR REPLACE FUNCTION email.read_attachments(IN _owner character varying, IN _message_id int8)
-  RETURNS TABLE(message_id int8,
-                attachments jsonb) AS
-$BODY$
-BEGIN
-	-- _owner is required
-	IF coalesce(TRIM(_owner), '') = '' THEN
-		RAISE EXCEPTION '_owner is required.';
-	END IF;
-
-	-- _message_id is required
-	/*IF _message_id IS NULL THEN
-		RAISE EXCEPTION '_message_id is required.';
-	END IF;*/
-
-	RETURN QUERY
-		SELECT a.message_id,
-		jsonb_agg(jsonb_build_object('id', a.id, 'filename', a.filename, 'destination', a.destination, 'mimetype', a.mimetype, 'encoding', a."encoding", 'size', a."size") ORDER BY a.id) AS attachments
-			FROM email.read_attachment(_owner, _message_id, NULL) a
-			GROUP BY a.message_id;
-END;			
-$BODY$
-LANGUAGE plpgsql VOLATILE;
 
 CREATE OR REPLACE FUNCTION email.attachment_latest_content_id_from_repository_newly_uploaded_exc(IN _owner character VARYING, IN _message_id int8, IN _attachment_id int8) --long name!!! _exc = _excluded
   RETURNS int8 AS
@@ -119,9 +113,9 @@ BEGIN
 
 	SELECT 	c.id
 			FROM repository.file_content c
-			LEFT JOIN email.attachment a
+			RIGHT JOIN email.attachment a
 			ON a.file_content_id = c.id AND a.file_id = c.file_id
-			WHERE c.owner = _owner AND a.message_id <> _message_id AND c.file_id = _attachment_id AND EXISTS (
+			WHERE a.message_id <> _message_id AND c.file_id = _attachment_id AND EXISTS (
 					SELECT 1
 					FROM (
 						SELECT
@@ -259,17 +253,19 @@ BEGIN
 	IF coalesce(TRIM(_owner), '') = '' THEN
 		RAISE EXCEPTION '_owner is required.';
 	END IF;
+
 	IF _message_id IS NOT NULL THEN
 		SELECT m.id FROM email.message m
 		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
 		IF _id IS NULL THEN
-			SELECT message_id FROM email.envelope e
+			SELECT e.message_id FROM email.envelope e
 			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
 			IF _id IS NULL THEN
 				_id = 0; -- not found
 			END IF;
 		END IF;
 	END IF;
+
 	-- check mailbox.postal_folders type
 	_postal_folders_arr = ARRAY(SELECT jsonb_array_elements_text(_postal_folders))::text[4];
 	-- check mailbox.postal_labels type
@@ -291,8 +287,8 @@ SELECT
 	mvw.subject,
 	mvw.body,
 	evw.envelopes,
-	--avw.attachments,
-	COALESCE(afn.attachments, '[]'::jsonb) AS attachments,
+	avw.attachments,
+	--COALESCE(afn.attachments, '[]'::jsonb) AS attachments,
 	COALESCE(tvw.tags, '[]'::jsonb) AS tags,
 	u.timeline_id,
 	u.snoozed_at,
@@ -341,10 +337,10 @@ FROM (
 	ON mvw.id = u.id
 	LEFT JOIN email.envelope_vw evw
 	ON evw.message_id = u.id
-	--LEFT JOIN email.attachment_vw avw
-  	--ON avw.message_id = u.id
-	LEFT JOIN email.read_attachments(_owner, _id) afn
-  	ON afn.message_id = u.id
+	LEFT JOIN email.attachment_vw avw
+  	ON avw.message_id = u.id
+	--LEFT JOIN email.read_attachments(_owner, COALESCE(u.eid, u.id)) afn
+  	--ON afn.message_id = COALESCE(u.eid, u.id)
 	LEFT JOIN email.tag_vw tvw
   	ON tvw.message_id = u.id
  	WHERE (_postal_folders IS NULL OR u.postal_folder = ANY (_postal_folders_arr) OR (u.postal_folder IS NULL AND jsonb_array_length(_postal_folders) = 0)) AND
@@ -448,7 +444,7 @@ BEGIN
 		SELECT m.id FROM email.message m
 		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
 		IF _id IS NULL THEN
-			SELECT message_id FROM email.envelope e
+			SELECT e.message_id FROM email.envelope e
 			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
 			IF _id IS NULL THEN
 				_id = 0; -- not found
@@ -461,7 +457,7 @@ BEGIN
 		SELECT m.id FROM email.message m
 		WHERE m.id = _parent_message_id AND m.sender_email_address = _owner INTO _parent_id;
 		IF _parent_id IS NULL THEN
-			SELECT message_id FROM email.envelope e
+			SELECT e.message_id FROM email.envelope e
 			WHERE e.id = _parent_message_id AND e.recipient_email_address = _owner INTO _parent_id;
 			IF _parent_id IS NULL THEN
 				_parent_id = 0; -- not found
@@ -858,7 +854,7 @@ BEGIN
 		SELECT m.id FROM email.message m
 		WHERE m.id = _message_id AND m.sender_email_address = _owner INTO _id;
 		IF _id IS NULL THEN
-			SELECT message_id FROM email.envelope e
+			SELECT e.message_id FROM email.envelope e
 			WHERE e.id = _message_id AND e.recipient_email_address = _owner INTO _id;
 			IF _id IS NULL THEN
 				_id = 0; -- not found
