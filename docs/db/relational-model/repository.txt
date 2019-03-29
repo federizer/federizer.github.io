@@ -36,12 +36,12 @@
        +-------+----------------+------------------+    |    |    |    FK3,KEY2 | folder_id     |            |
        |       | display_name   |                  |    |    |    | UK          | name          | FK3        |
        |       | given_name     |                  |    |    |    +-------------+---------------+------+     |
-       |       | middle_name    |                  |    |    |    |             | labels (JSON) |      |     |
-       |       | family_name    |                  |    |    |    |             | search_name   |      |     |
-       +-------+----------------+                  |    |    |    |             | timeline_id   |      |     |
-                                                   |    |    |    |             | updated_at    |      |     |
+       |       | middle_name    |                  |    |    |    |             | search_name   |      |     |
+       |       | family_name    |                  |    |    |    |             | timeline_id   |      |     |
+       +-------+----------------+                  |    |    |    |             | updated_at    |      |     |
                                                    |    |    |    |             | created_at    |      |     |
                                                    |    |    |    +-------------+---------------+      |     |
+                                                   |    |    |                  |                      |     |
                                                    |    |    |                  |                      |     |
                                                    |    |    |                  |                      |     |
                                                    |    |    |                  | FK1                  |     |
@@ -99,7 +99,6 @@
                   |                               |    FK4,KEY3 | file_content_id  |
                   |               FK3             | UK          | name             |
                   +-------------------------------+-------------+------------------+
-                                                  |             | labels (JSON)    |
                                                   |             | search_name      |
                                                   |             | timeline_id      |
                                                   |             | updated_at       |
