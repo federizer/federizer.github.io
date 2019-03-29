@@ -94,7 +94,7 @@
                   |                       |       | PK          | id               |          FK2         |
                   |                       +-------+-------------+------------------+----------------------+ 
                   |                               | UK,FK1      | user_id          |
-                  |                               | UK,FK2,KEY1 | parent_id        |
+                  |                               | UK,FK2,KEY1 | folder_id        |
                   |                               |    FK3,KEY2 | file_id          |
                   |                               |    FK4,KEY3 | file_content_id  |
                   |               FK3             | UK          | name             |
