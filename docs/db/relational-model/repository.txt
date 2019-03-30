@@ -55,18 +55,18 @@
               | FK,KEY  | owner_id   |         | FK     | identity_id               |         | FK,KEY | owner_id    |
               | UK      | uufiid     |         | UK1    | sub                       |         | UK     | uufoid      |
               +---------+------------+         | UK2    | email                     |         +--------+-------------+
-              |         | mimetype   |         +--------+---------------------------+         |        | locked      |
-              |         | locked     |         |        | email_verified            |         |        | hidden      |
-              |         | hidden     |         |        | password                  |         |        | created_at  |
-              |         | created_at |         |        | updated_at                |         +--------+-------------+
-              +---------+------------+         |        | created_at                |                     ^
-                  ^              ^             +--------+---------------------------+                     |
-                  |              |                 ^               ^                                      |
+              |         | mimetype   |         +--------+---------------------------+         |        | mimetype    |
+              |         | encoding   |         |        | email_verified            |         |        | locked      |
+              |         | locked     |         |        | password                  |         |        | hidden      |
+              |         | hidden     |         |        | updated_at                |         |        | created_at  |
+              |         | created_at |         |        | created_at                |         +--------+-------------+
+              +---------+------------+         +--------+---------------------------+                     ^
+                  ^              ^                 ^               ^                                      |
                   |              |                 |               |                                      |
                   |              | FK2             | FK1           |                                      |
                   |              |                 |               |                                      |
                   |        +-----+-----------------+----+          |                                      |
-                  |        |     tb_file_content        |          |                                      |
+                  |        |       tb_file_content      |          |                                      |
                   |        +-----------+----------------+          |                                      |
                   |        | PK        | id             |          |                                      |
                   |        +-----------+----------------+          |                                      |
