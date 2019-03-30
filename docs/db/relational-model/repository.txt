@@ -1,5 +1,4 @@
 
-
        +----------------+                  +-------------------------+          +--------------------+
        |   tb_session   |                  | tb_identity_self_issued |          |    tb_identity     |
        +----+-----------+                  +----+--------------------+          +----+---------------+
@@ -36,12 +35,12 @@
        +-------+----------------+------------------+    |    |    |    FK3,KEY2 | folder_id     |            |
        |       | display_name   |                  |    |    |    | UK          | name          | FK3        |
        |       | given_name     |                  |    |    |    +-------------+---------------+------+     |
-       |       | middle_name    |                  |    |    |    |             | search_name   |      |     |
-       |       | family_name    |                  |    |    |    |             | timeline_id   |      |     |
-       +-------+----------------+                  |    |    |    |             | updated_at    |      |     |
+       |       | middle_name    |                  |    |    |    |             | folitype      |      |     |
+       |       | family_name    |                  |    |    |    |             | search_name   |      |     |
+       +-------+----------------+                  |    |    |    |             | timeline_id   |      |     |
+                                                   |    |    |    |             | updated_at    |      |     |
                                                    |    |    |    |             | created_at    |      |     |
                                                    |    |    |    +-------------+---------------+      |     |
-                                                   |    |    |                  |                      |     |
                                                    |    |    |                  |                      |     |
                                                    |    |    |                  |                      |     |
                                                    |    |    |                  | FK1                  |     |
@@ -55,13 +54,14 @@
               | FK,KEY  | owner_id   |         | FK     | identity_id               |         | FK,KEY | owner_id    |
               | UK      | uufiid     |         | UK1    | sub                       |         | UK     | uufoid      |
               +---------+------------+         | UK2    | email                     |         +--------+-------------+
-              |         | mimetype   |         +--------+---------------------------+         |        | mimetype    |
-              |         | encoding   |         |        | email_verified            |         |        | locked      |
-              |         | locked     |         |        | password                  |         |        | hidden      |
-              |         | hidden     |         |        | updated_at                |         |        | created_at  |
-              |         | created_at |         |        | created_at                |         +--------+-------------+
-              +---------+------------+         +--------+---------------------------+                     ^
-                  ^              ^                 ^               ^                                      |
+              |         | fitype     |         +--------+---------------------------+         |        | fotype      |
+              |         | mimetype   |         |        | email_verified            |         |        | locked      |
+              |         | encoding   |         |        | password                  |         |        | hidden      |
+              |         | locked     |         |        | updated_at                |         |        | created_at  |
+              |         | hidden     |         |        | created_at                |         +--------+-------------+
+              |         | created_at |         +--------+---------------------------+                     ^
+              +---------+------------+             ^               ^                                      |
+                  ^              ^                 |               |                                      |
                   |              |                 |               |                                      |
                   |              | FK2             | FK1           |                                      |
                   |              |                 |               |                                      |
@@ -99,6 +99,7 @@
                   |                               |    FK4,KEY3 | file_content_id  |
                   |               FK3             | UK          | name             |
                   +-------------------------------+-------------+------------------+
+                                                  |             | filitype         |
                                                   |             | search_name      |
                                                   |             | timeline_id      |
                                                   |             | updated_at       |
