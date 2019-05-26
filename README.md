@@ -1,2 +1,2 @@
 ## Federizer
-Federizer is a cloud-native email system that brings together repository, communication and identity in a synergistic way. It is a replacement for a traditional email system that no longer meets security standards and functional requirements.
+Federizer is a progressive, cloud-native email system that brings together repository, communication and identity in a synergistic way. It is a replacement for a traditional email system that no longer meets security standards and functional requirements.
