@@ -1,2 +1,4 @@
 ## Federizer
-Federizer is the next-generation email system aligned with emerging and future business needs. It is a replacement for the current email system that no longer meets security standards and functional requirements.
+Federizer is a digital media exchange and storage system analogous to cargo services. People can use Federizer if they
+need to transfer and store something that is either bulky or large in numbers. This includes documents, images,
+audios and videos, otherwise Federizer can be used in a similar way as the traditional email system.
