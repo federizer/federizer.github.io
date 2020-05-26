@@ -7,17 +7,17 @@ INSERT INTO mail.message
 VALUES('jdoe@leadict.com', 'John Doe', 'Allo', 'Allo, Allo!');
 INSERT INTO mail.message
 (sender_email_address, sender_display_name, subject, body)
-VALUES('izboran@gmail.com', 'Igor Zboran', 'Hello again', 'Hello everybody!');
+VALUES('jharper@gmail.com', 'Joe Harper', 'Hello again', 'Hello everybody!');
 INSERT INTO mail.message
 (sender_email_address, sender_display_name, subject, body)
-VALUES('izboran@gmail.com', 'Igor Zboran', 'Invoice1', '124€');
+VALUES('jharper@gmail.com', 'Joe Harper', 'Invoice1', '124ï¿½');
 INSERT INTO mail.message
 (sender_email_address, sender_display_name, subject, body)
-VALUES('izboran@gmail.com', 'Igor Zboran', 'Invoice2', '15,25€');
+VALUES('jharper@gmail.com', 'Joe Harper', 'Invoice2', '15,25ï¿½');
 --mail.envelope create-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.envelope
 (message_id, "type", recipient_email_address, recipient_display_name)
-VALUES(1, 'to', 'izboran@gmail.com', 'Igor Zboran');
+VALUES(1, 'to', 'jharper@gmail.com', 'Joe Harper');
 INSERT INTO mail.envelope
 (message_id, "type", recipient_email_address, recipient_display_name)
 VALUES(1, 'cc', 'hfinn@leadict.com', 'Huckleberry Finn');
@@ -27,7 +27,7 @@ VALUES(1, 'cc', 'tsawyer@leadict.com', 'Tom Sawyer');
 
 INSERT INTO mail.envelope
 (message_id, "type", recipient_email_address, recipient_display_name)
-VALUES(2, 'to', 'izboran@gmail.com', 'Igor Zboran');
+VALUES(2, 'to', 'jharper@gmail.com', 'Joe Harper');
 INSERT INTO mail.envelope
 (message_id, "type", recipient_email_address, recipient_display_name)
 VALUES(2, 'cc', 'hfinn@leadict.com', 'Huckleberry Finn');
@@ -77,11 +77,11 @@ VALUES('jdoe@leadict.com', 1, NULL, 'sent', true, true);
 
 INSERT INTO postal.mailbox
 (owner, message_id, envelope_id, folder, important, unread)
-VALUES('izboran@gmail.com', NULL, 1, 'inbox', true, true);
+VALUES('jharper@gmail.com', NULL, 1, 'inbox', true, true);
 
 INSERT INTO postal.mailbox
 (owner, message_id, envelope_id, folder)
-VALUES('izboran@gmail.com', 3, NULL, 'sent');
+VALUES('jharper@gmail.com', 3, NULL, 'sent');
 
 INSERT INTO postal.mailbox
 (owner, message_id, envelope_id, folder, unread)
@@ -93,20 +93,20 @@ VALUES('tsawyer@leadict.com', NULL, 8, 'inbox', false);
 
 INSERT INTO postal.mailbox
 (owner, message_id, envelope_id, folder)
-VALUES('izboran@gmail.com', 4, NULL, 'drafts');
+VALUES('jharper@gmail.com', 4, NULL, 'drafts');
 --labels.custom_label-------------------------------------------------------------------------------------------------------------
 INSERT INTO labels.custom_label
 (owner, name)
-VALUES('jdoe@leadict.com', 'Igor');
+VALUES('jdoe@leadict.com', 'Joe');
 INSERT INTO labels.custom_label
 (owner, name)
 VALUES('jdoe@leadict.com', 'Testing');
 INSERT INTO labels.custom_label
 (owner, name)
-VALUES('izboran@gmail.com', 'John Doe');
+VALUES('jharper@gmail.com', 'John Doe');
 INSERT INTO labels.custom_label
 (owner, name)
-VALUES('izboran@gmail.com', 'Testing');
+VALUES('jharper@gmail.com', 'Testing');
 
 INSERT INTO labels.has
 (owner, mailbox_id, custom_label_id)
@@ -116,13 +116,13 @@ INSERT INTO labels.has
 VALUES('jdoe@leadict.com', 4, 2);
 INSERT INTO labels.has
 (owner, mailbox_id, custom_label_id)
-VALUES('izboran@gmail.com', 6, 4);
+VALUES('jharper@gmail.com', 6, 4);
 INSERT INTO labels.has
 (owner, mailbox_id, custom_label_id)
-VALUES('izboran@gmail.com', 2, 3);
+VALUES('jharper@gmail.com', 2, 3);
 INSERT INTO labels.has
 (owner, mailbox_id, custom_label_id)
-VALUES('izboran@gmail.com', 2, 4);
+VALUES('jharper@gmail.com', 2, 4);
 --mail.attachment-------------------------------------------------------------------------------------------------------------
 INSERT INTO mail.attachment
 (message_id, uuaid, filename, destination, mimetype, encoding, size)
@@ -143,7 +143,7 @@ INSERT INTO mail.tag
 VALUES(1, 5, 'Meeting', '2019-01-10 16:00:00');
 INSERT INTO mail.tag
 (message_id, type, name, value)
-VALUES(3, 1, 'Invoice', '82,50'); -- $,€ currency ?
+VALUES(3, 1, 'Invoice', '82,50'); -- $,ï¿½ currency ?
 INSERT INTO mail.tag
 (message_id, type, name, value)
 VALUES(3, 5, 'Due date', '2019-01-31 23:59:59');

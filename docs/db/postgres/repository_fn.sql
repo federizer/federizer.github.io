@@ -44,7 +44,7 @@ LANGUAGE plpgsql VOLATILE;
 
 /*
 SELECT *  FROM repository.read_file(
-	'izboran@gmail.com',					-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jharper@gmail.com',					-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	1,										-- put the _message_id parameter value instead of '_message_id' (int8) 123
 	'70d2d183-49da-4400-8318-de0275167a80' 	-- put the _uufid parameter value instead of '_uuaid' (uuid) 70d2d183-49da-4400-8318-de0275167a80
 );

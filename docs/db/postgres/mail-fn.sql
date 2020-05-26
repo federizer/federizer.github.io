@@ -109,20 +109,20 @@ LANGUAGE plpgsql VOLATILE;
 
 /*
 SELECT * from mail.read_messages(
-	'jdoe@leadict.com',			-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jdoe@leadict.com',			-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	NULL,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
 	NULL,							-- put the _mailbox_folders parameter value instead of '_mailbox_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
 	NULL,							-- put the _mailbox_labels parameter value instead of '_mailbox_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
-	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
+	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Joe"]' -- 'or' between values --
 	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 20 --
 	NULL							-- put the _timeline_id parameter value instead of '_timeline_id' (int8) NULL, 123 --
 );
 SELECT * from mail.read_messages(
-	'izboran@gmail.com',			-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jharper@gmail.com',			-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	NULL,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
 	NULL,							-- put the _mailbox_folders parameter value instead of '_mailbox_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
 	NULL,							-- put the _mailbox_labels parameter value instead of '_mailbox_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
-	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
+	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Joe"]' -- 'or' between values --
 	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 20 --
 	NULL							-- put the _timeline_id parameter value instead of '_timeline_id' (int8) NULL, 123 --
 );
@@ -159,7 +159,7 @@ LANGUAGE plpgsql VOLATILE;
 
 /*
 SELECT *  FROM mail.read_attachment(
-	'izboran@gmail.com',					-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jharper@gmail.com',					-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	1,										-- put the _message_id parameter value instead of '_message_id' (int8) 123
 	'70d2d183-49da-4400-8318-de0275167a80' 	-- put the _uuaid parameter value instead of '_uuaid' (uuid) 70d2d183-49da-4400-8318-de0275167a80
 );
@@ -197,7 +197,7 @@ LANGUAGE plpgsql VOLATILE;
 
 /*
 SELECT mail.delete_attachment(
-	'izboran@gmail.com',					-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jharper@gmail.com',					-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	4,										-- put the _message_id parameter value instead of '_message_id' (int8) 123
 	'74aa8f05-f2a2-4da4-981d-e9728f7a4fc1' 	-- put the _uuaid parameter value instead of '_uuaid' (uuid) 70d2d183-49da-4400-8318-de0275167a80
 );
@@ -253,7 +253,7 @@ LANGUAGE plpgsql VOLATILE;
 
 /*
 SELECT mail.create_attachment(
-	'jdoe@leadict.com',					-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jdoe@leadict.com',					-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	14,										-- put the _message_id parameter value instead of '_message_id' (int8) 123
 	'[
 	  {
@@ -467,17 +467,17 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
---SELECT mail.upsert_message('jdoe@leadict.com', NULL, 'John Doe', '{"body":"A message to delete X1","subject":"To delete X1","envelopes":{"to":[{"display_name":"Peter Salon","email_address":"peter.salon@gmail.com"}],"cc":[{"display_name":"Igor Zboran","email_address":"izboran@gmail.com"}],"bcc":[{"display_name":"Filip Figuli","email_address":"ffiguli@leadict.com"},{"display_name":"Rastislav Filip","email_address":"rastislav.filip@gmail.com"}]},"tags":[{"type":0,"name":"invoice","value":"164/11"},{"type":1,"name":"number","value":1234}]}', NULL, 'send');
---SELECT mail.upsert_message('jdoe@leadict.com', 3, 'John Doe', '{"body":"A message to delete X1","subject":"To delete X1","envelopes":{"to":[{"display_name":"Peter Salon","email_address":"peter.salon@gmail.com"}],"cc":[{"display_name":"Igor Zboran","email_address":"izboran@gmail.com"}],"bcc":[{"display_name":"Filip Figuli","email_address":"ffiguli@leadict.com"},{"display_name":"Rastislav Filip","email_address":"rastislav.filip@gmail.com"}]},"tags":[{"type":0,"name":"invoice","value":"164/11"},{"type":1,"name":"number","value":1234}]}', NULL, '{"action":"send"}'::jsonb);
---SELECT mail.upsert_message('jdoe@leadict.com', 3, 'John Doe', '{"body":"A message to delete X1","subject":"To delete X1","envelopes":{"to":[{"display_name":"Peter Salon","email_address":"peter.salon@gmail.com"}],"cc":[{"display_name":"Igor Zboran","email_address":"izboran@gmail.com"}],"bcc":[{"display_name":"Filip Figuli","email_address":"ffiguli@leadict.com"},{"display_name":"Rastislav Filip","email_address":"rastislav.filip@gmail.com"}]},"tags":[{"type":0,"name":"invoice","value":"164/11"},{"type":1,"name":"number","value":1234}]}', NULL, '{"action":"send"}');
+--SELECT mail.upsert_message('jdoe@leadict.com', NULL, 'John Doe', '{"body":"A message to delete X1","subject":"To delete X1","envelopes":{"to":[{"display_name":"Peter Salon","email_address":"peter.salon@gmail.com"}],"cc":[{"display_name":"Joe Harper","email_address":"jharper@gmail.com"}],"bcc":[{"display_name":"Filip Figuli","email_address":"ffiguli@leadict.com"},{"display_name":"Rastislav Filip","email_address":"rastislav.filip@gmail.com"}]},"tags":[{"type":0,"name":"invoice","value":"164/11"},{"type":1,"name":"number","value":1234}]}', NULL, 'send');
+--SELECT mail.upsert_message('jdoe@leadict.com', 3, 'John Doe', '{"body":"A message to delete X1","subject":"To delete X1","envelopes":{"to":[{"display_name":"Peter Salon","email_address":"peter.salon@gmail.com"}],"cc":[{"display_name":"Joe Harper","email_address":"jharper@gmail.com"}],"bcc":[{"display_name":"Filip Figuli","email_address":"ffiguli@leadict.com"},{"display_name":"Rastislav Filip","email_address":"rastislav.filip@gmail.com"}]},"tags":[{"type":0,"name":"invoice","value":"164/11"},{"type":1,"name":"number","value":1234}]}', NULL, '{"action":"send"}'::jsonb);
+--SELECT mail.upsert_message('jdoe@leadict.com', 3, 'John Doe', '{"body":"A message to delete X1","subject":"To delete X1","envelopes":{"to":[{"display_name":"Peter Salon","email_address":"peter.salon@gmail.com"}],"cc":[{"display_name":"Joe Harper","email_address":"jharper@gmail.com"}],"bcc":[{"display_name":"Filip Figuli","email_address":"ffiguli@leadict.com"},{"display_name":"Rastislav Filip","email_address":"rastislav.filip@gmail.com"}]},"tags":[{"type":0,"name":"invoice","value":"164/11"},{"type":1,"name":"number","value":1234}]}', NULL, '{"action":"send"}');
 
 /*
 SELECT * from mail.read_messages(
-	'jdoe@leadict.com',			-- put the _owner parameter value instead of '_owner' (varchar) izboran@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
+	'jdoe@leadict.com',			-- put the _owner parameter value instead of '_owner' (varchar) jharper@gmail.com, jdoe@leadict.com, tsawyer@leadict.com, hfinn@leadict.com
 	NULL,							-- put the _message_id parameter value instead of '_message_id' (int8) NULL, 123
 	NULL,							-- put the _mailbox_folders parameter value instead of '_mailbox_folders' (jsonb) NULL, '[]', '["inbox", "snoozed", "sent", "drafts"]'  -- 'or' between values -- 
 	NULL,							-- put the _mailbox_labels parameter value instead of '_mailbox_labels' (jsonb) NULL, '[]', '["done", "archived", "starred", "important", "chats", "spam", "unread", "trash"]' -- 'or' between values --
-	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Igor"]' -- 'or' between values --
+	NULL, 							-- put the _custom_label_labels parameter value instead of '_custom_label_labels' (jsonb) NULL, '[]', '["John Doe", "Joe"]' -- 'or' between values --
 	NULL,							-- put the _limit parameter value instead of '_limit' (int4) NULL, 20 --
 	NULL							-- put the _timeline_id parameter value instead of '_timeline_id' (int8) NULL, 123 --
 )
@@ -524,4 +524,4 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE;
 
---SELECT mail.delete_message('izboran@gmail.com', NULL);
+--SELECT mail.delete_message('jharper@gmail.com', NULL);
